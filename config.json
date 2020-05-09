@@ -1,0 +1,7 @@
+{
+    "default_graph_file":"./data/GraphSON_blueprints.json",
+    "render":{
+        "font":"20px Arial",
+        "margin":3
+    }
+}
