@@ -46,6 +46,12 @@ class Svg{
         );
     }
     
+    rect_p(parent,x,y,w,h){
+        return html(parent,
+        /*html*/`<rect x="${x}" y="${y}" rx="3" width="${w}" height="${h}" stroke="black" stroke-width="0" fill="green" />`
+        );
+    }
+    
     box(b){
         return html(this.el,
         /*html*/`<rect x="${b.x}" y="${b.y}" rx="5" width="${b.width}" height="${b.height}" stroke="black" stroke-width="0" fill="green" />`

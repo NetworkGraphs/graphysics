@@ -20,14 +20,13 @@ class GraphApp{
         await gio.import_file(config.default_graph_file)
         render.setViewBoxes(config.render)
         console.log(graph)
-        physics.load_vertices(parent_div)
-        render.init(parent_div)
-        render.draw()
+        physics.create(parent_div)
+        render.create(parent_div)
     }
 
     run(){
         physics.run()
-        render.move()
+        render.update()
     }
 
 }

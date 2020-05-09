@@ -11,10 +11,11 @@ class Render{
         g = graph_data
     }
 
-    init(parent_div){
+    create(parent_div){
         let [w,h] = [parent_div.offsetWidth,parent_div.offsetHeight]
         svg = html(parent_div,/*html*/`<svg id="main_svg" xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"></svg>`);
         utl.set_parent(svg)
+        this.draw()
     }
 
     setViewBoxes(config){
@@ -31,15 +32,33 @@ class Render{
 
     draw(){
         clear(svg)
+        let g_edges = html(svg,/*html*/`<g ig="edges">`)
+        for(let [eid,e] of Object.entries(g.edges)){
+            let [x1,y1,x2,y2] = [e.outV.viewBox.x,e.outV.viewBox.y,e.inV.viewBox.x,e.inV.viewBox.y]
+            let s_width = (1+e.weight*5)
+            e.svg = html(g_edges,/*html*/`<path d="M ${x1} ${y1} L ${x2} ${y2}" stroke="rgb(50,150,50)" stroke-width="${s_width}">`)
+        }
+        let g_vertices = html(svg,/*html*/`<g id="vertices"/>`)
         for(let [vid,v] of Object.entries(g.vertices)){
-            v.svg = utl.rect(-v.viewBox.width/2,-v.viewBox.height/2,v.viewBox.width,v.viewBox.height)
+            let [x,y,w,h] = [-v.viewBox.width/2,-v.viewBox.height/2,v.viewBox.width,v.viewBox.height]
+            v.svg = html(g_vertices,/*html*/`<g id="vert_${v.name}"/>`)
+            html(v.svg,/*html*/`<rect x="${x}" y="${y}" rx="3" width="${w}" height="${h}" fill="rgb(100,205,100)" />`)
+            html(v.svg,/*html*/`<text x="0" y="0" dominant-baseline="middle" text-anchor="middle">${v.label}</text>`)
             v.svg.setAttribute("transform", `translate(${v.viewBox.x},${v.viewBox.y}) rotate(${0})`);
         }
     }
 
-    move(){
+    update(){
         for(let [vid,v] of Object.entries(g.vertices)){
-            v.svg.setAttribute("transform", `translate(${v.viewBox.x},${v.viewBox.y}) rotate(${v.viewBox.angle})`);
+            if(v.viewBox.moved){
+                v.svg.setAttribute("transform", `translate(${v.viewBox.x},${v.viewBox.y}) rotate(${v.viewBox.angle})`);
+            }
+        }
+        for(let [eid,e] of Object.entries(g.edges)){
+            if(e.outV.viewBox.moved || e.inV.viewBox.moved){
+                let [x1,y1,x2,y2] = [e.outV.viewBox.x,e.outV.viewBox.y,e.inV.viewBox.x,e.inV.viewBox.y]
+                e.svg.setAttribute("d",`M ${x1} ${y1} L ${x2} ${y2}`)
+            }
         }
     }
 

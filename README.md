@@ -23,6 +23,14 @@ Graph with Physics, No nodes overlap, morph nodes to properties and groups
   * groups
 * Hierarchical and cross Grouping
 
+## Plan details
+* stochastic centrality placement
+* mouse drag nodes
+* highlight node and neighbors on mouse hover
+* edges with polylines and arrows
+* edges labels on path
+* multi-edges
+
 # Development details
 * Matter js as physics engine
 * svr render base, no update
