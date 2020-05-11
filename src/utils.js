@@ -8,7 +8,13 @@ async function fetch_json(file){
     return response.json()
 }
 
+function event(event_name,data){
+	var event = new CustomEvent(event_name, {detail:data});
+	window.dispatchEvent(event);
+}
+
 export{
     fetch_json,
-    obj_has
+    obj_has,
+    event
 };

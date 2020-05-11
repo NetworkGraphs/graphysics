@@ -42,8 +42,8 @@ class Render{
         for(let [vid,v] of Object.entries(g.vertices)){
             let [x,y,w,h] = [-v.viewBox.width/2,-v.viewBox.height/2,v.viewBox.width,v.viewBox.height]
             v.svg = html(g_vertices,/*html*/`<g id="vert_${v.name}"/>`)
-            html(v.svg,/*html*/`<rect x="${x}" y="${y}" rx="3" width="${w}" height="${h}" fill="rgb(100,205,100)" />`)
-            html(v.svg,/*html*/`<text x="0" y="0" dominant-baseline="middle" text-anchor="middle">${v.label}</text>`)
+            html(v.svg,/*html*/`<rect  class="vertex" id="${v.id}" x="${x}" y="${y}" rx="3" width="${w}" height="${h}" fill="rgb(100,205,100)" />`)
+            html(v.svg,/*html*/`<text x="0" y="0" dominant-baseline="middle" text-anchor="middle" style="pointer-events:none">${v.label}</text>`)
             v.svg.setAttribute("transform", `translate(${v.viewBox.x},${v.viewBox.y}) rotate(${0})`);
         }
     }

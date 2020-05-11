@@ -1,12 +1,14 @@
 import {GraphIo} from "./graph_io.js"
 import { Render } from "./render.js"
 import { Physics } from "./physics.js"
+import { Mouse } from "./mouse.js"
 
 //singelton protected members
 let graph   = null
 let gio     = null
 let render  = null
 let physics = null
+let mouse   = null
 
 class GraphApp{
     constructor(){
@@ -14,6 +16,7 @@ class GraphApp{
         gio = new GraphIo(graph)
         render = new Render(graph)
         physics = new Physics(graph)
+        mouse = new Mouse()
     }
 
     async load(config,parent_div){
@@ -22,8 +25,9 @@ class GraphApp{
         console.log(graph)
         physics.create(parent_div)
         render.create(parent_div)
+        mouse.init(parent_div)
     }
-
+S
     run(){
         physics.run()
         render.update()
