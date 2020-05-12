@@ -1,6 +1,6 @@
 import {event} from "./utils.js"
 
-let state ={over_vertex:false,coord:{x:0,y:0},offset:{x:0,y:0},dragging:false,acting:false};
+let state ={over_vertex:false,id:0,coord:{x:0,y:0},offset:{x:0,y:0},dragging:false,acting:false};
 
 function onContext(e){
     if(e.target.tagName == "rect"){
@@ -16,18 +16,38 @@ function onMousePan(e){
     let vdx = e.offsetX - state.offset.x;
     let vdy = e.offsetY - state.offset.y;
     if(e.type == "mousemove"){
+        if(!state.dragging){//then no update for the hover state machine
+            if(is_vetex){
+                if(!state.over_vertex){
+                    state.id = e.target.id
+                    state.over_vertex = true
+                    event("vertex_hover",{type:"enter",id:state.id})
+                }else{
+                    if(e.target.id != state.id){
+                        event("vertex_hover",{type:"exit",id:state.id})//exit old
+                        state.id = e.target.id
+                        event("vertex_hover",{type:"enter",id:state.id})//enter new
+                    }
+                }
+            }else{
+                if(state.over_vertex){
+                    event("vertex_hover",{type:"exit",id:state.id})
+                    state.over_vertex = false
+                }
+            }
+        }
         if((e.buttons == 1) && state.dragging){
-            event("mouse_vertex",{type:"drag_move",tx:vdx,ty:vdy})
+            event("vertex_drag",{type:"move",tx:vdx,ty:vdy})
         }
     }else if(e.type == "mousedown"){
         if((e.buttons == 1) && is_vetex){
             state.dragging = true
-            event("mouse_vertex",{type:"drag_start",id:e.target.id})
+            event("vertex_drag",{type:"start",id:e.target.id})
         }
     }else if(e.type == "mouseup"){
         if(state.dragging){
             state.dragging = false
-            event("mouse_vertex",{type:"drag_end"})
+            event("vertex_drag",{type:"end"})
         }
     }
     state.coord.x = e.clientX;

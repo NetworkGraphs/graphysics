@@ -40,8 +40,8 @@ function get_delta_correction(){
     return {delta:delta, correction:correction};
 }
 
-function onMouseVertex(e){
-    if(e.detail.type == "drag_start"){
+function onVertexDrag(e){
+    if(e.detail.type == "start"){
         const body = g.vertices[e.detail.id].body
         console.log(`drag start: ${body.label} at (${body.position.x} , ${body.position.y})`)
         drag.position = body.position
@@ -53,10 +53,10 @@ function onMouseVertex(e){
             pointB:body.position
         });
         Matter.World.addConstraint(engine.world,drag.constraint);
-    }else if(e.detail.type == "drag_end"){
+    }else if(e.detail.type == "end"){
         console.log(`drag end`)
         Matter.World.remove(engine.world,drag.constraint);
-    }else if(e.detail.type == "drag_move"){
+    }else if(e.detail.type == "move"){
         drag.position = Matter.Vector.add(drag.position,Matter.Vector.create(e.detail.tx,e.detail.ty));
         drag.constraint.pointB = drag.position;
     }
@@ -68,7 +68,7 @@ class Physics{
         engine = Matter.Engine.create({enableSleeping:true})
         engine.world.gravity.y = 0.0
 
-        window.addEventListener( 'mouse_vertex', onMouseVertex, false );
+        window.addEventListener( 'vertex_drag', onVertexDrag, false );
     }
 
     create(parent_div){

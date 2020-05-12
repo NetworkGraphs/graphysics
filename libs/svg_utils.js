@@ -101,6 +101,17 @@ class Svg{
       `)
     }
 
+    filter_light_shadow(parent,params){
+        return html(parent,/*html*/`
+            <filter id="${params.id}" width="200%" height="200%">
+                <feDiffuseLighting in="SourceGraphic" result="light" light-color="white">
+                    <fePointLight x="-30" y="-10" z="20"></fePointLight>
+                </feDiffuseLighting>
+                <feComposite in="SourceGraphic" in2="light" operator="arithmetic" k1="0.8" k2="0.2" k3="0" k4="0"></feComposite>
+                <feDropShadow dx="10" dy="5" stdDeviation="3"></feDropShadow>
+            </filter>`)
+    }
+
     save(fileName,evg_element=null){
         if(evg_element == null){evg_element = this.el}
         let s = new XMLSerializer();

@@ -6,9 +6,25 @@ let utl = new Svg()
 let g = null;
 let svg = null;
 
+function onVertexHover(e){
+    const vertex = g.vertices[e.detail.id]
+    if(e.detail.type == "enter"){
+        for(let [vid,v] of Object.entries(vertex.neighbors)){
+            v.svg.setAttribute("filter","url(#f_light_shadow)")
+        }
+        console.log(`hover enter: ${vertex.label}`)
+    }else if(e.detail.type == "exit"){
+        for(let [vid,v] of Object.entries(vertex.neighbors)){
+            v.svg.setAttribute("filter","")
+        }
+        console.log(`hover exit: ${vertex.label}`)
+    }
+}
+
 class Render{
     constructor(graph_data){
         g = graph_data
+        window.addEventListener( 'vertex_hover', onVertexHover, false );
     }
 
     create(parent_div){
@@ -32,6 +48,7 @@ class Render{
 
     draw(){
         clear(svg)
+        utl.filter_light_shadow(svg,{id:"f_light_shadow"})
         let g_edges = html(svg,/*html*/`<g ig="edges">`)
         for(let [eid,e] of Object.entries(g.edges)){
             let [x1,y1,x2,y2] = [e.outV.viewBox.x,e.outV.viewBox.y,e.inV.viewBox.x,e.inV.viewBox.y]
