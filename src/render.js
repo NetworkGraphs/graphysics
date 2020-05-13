@@ -6,18 +6,33 @@ let utl = new Svg()
 let g = null;
 let svg = null;
 
+function set_filter_neighbors(vertex,filterName){
+    if(filterName != ""){
+        for(let [vid,v] of Object.entries(vertex.neighbors)){
+            v.svg.setAttribute("filter",`url(#${filterName})`)
+        }
+    }
+}
+
 function onVertexHover(e){
     const vertex = g.vertices[e.detail.id]
     if(e.detail.type == "enter"){
-        for(let [vid,v] of Object.entries(vertex.neighbors)){
-            v.svg.setAttribute("filter","url(#f_light_shadow)")
-        }
+        vertex.svg.setAttribute("filter",`url(#f_light_shadow)`)
+        set_filter_neighbors(vertex,"f_light_shadow")
         console.log(`hover enter: ${vertex.label}`)
     }else if(e.detail.type == "exit"){
-        for(let [vid,v] of Object.entries(vertex.neighbors)){
-            v.svg.setAttribute("filter","")
-        }
+        vertex.svg.setAttribute("filter",`url(#f_light)`)
+        set_filter_neighbors(vertex,"f_light")
         console.log(`hover exit: ${vertex.label}`)
+    }
+}
+
+function onVertexDrag(e){
+    const vertex = g.vertices[e.detail.id]
+    if(e.detail.type == "start"){
+        vertex.svg.setAttribute("filter",`url(#f_light_shadow_h)`)
+    }else if(e.detail.type == "end"){
+        vertex.svg.setAttribute("filter",`url(#f_light_shadow)`)
     }
 }
 
@@ -25,6 +40,7 @@ class Render{
     constructor(graph_data){
         g = graph_data
         window.addEventListener( 'vertex_hover', onVertexHover, false );
+        window.addEventListener( 'vertex_drag', onVertexDrag, false );
     }
 
     create(parent_div){
@@ -48,7 +64,11 @@ class Render{
 
     draw(){
         clear(svg)
-        utl.filter_light_shadow(svg,{id:"f_light_shadow"})
+        utl.filter_light(svg,{id:"f_light",lx:-30,ly:-10,lz:20})
+        utl.filter_light(svg,{id:"f_high_light",lx:-30,ly:-10,lz:100})
+        utl.filter_light_shadow(svg,{id:"f_light_shadow_h",lx:-30,ly:-10,lz:20,dx:15,dy:8})
+        utl.filter_light_shadow(svg,{id:"f_light_shadow",lx:-30,ly:-10,lz:20,dx:5,dy:2})
+        const defaultFilter = "f_light"
         let g_edges = html(svg,/*html*/`<g ig="edges">`)
         for(let [eid,e] of Object.entries(g.edges)){
             let [x1,y1,x2,y2] = [e.outV.viewBox.x,e.outV.viewBox.y,e.inV.viewBox.x,e.inV.viewBox.y]
@@ -59,7 +79,7 @@ class Render{
         for(let [vid,v] of Object.entries(g.vertices)){
             let [x,y,w,h] = [-v.viewBox.width/2,-v.viewBox.height/2,v.viewBox.width,v.viewBox.height]
             v.svg = html(g_vertices,/*html*/`<g id="vert_${v.name}"/>`)
-            html(v.svg,/*html*/`<rect  class="vertex" id="${v.id}" x="${x}" y="${y}" rx="3" width="${w}" height="${h}" fill="rgb(100,205,100)" />`)
+            html(v.svg,/*html*/`<rect  class="vertex" id="${v.id}" x="${x}" y="${y}" rx="3" width="${w}" height="${h}" fill="rgb(100,205,100)" filter="url(#${defaultFilter})" />`)
             html(v.svg,/*html*/`<text x="0" y="0" dominant-baseline="middle" text-anchor="middle" style="pointer-events:none">${v.label}</text>`)
             v.svg.setAttribute("transform", `translate(${v.viewBox.x},${v.viewBox.y}) rotate(${0})`);
         }

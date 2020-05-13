@@ -42,12 +42,13 @@ function onMousePan(e){
     }else if(e.type == "mousedown"){
         if((e.buttons == 1) && is_vetex){
             state.dragging = true
-            event("vertex_drag",{type:"start",id:e.target.id})
+            state.id = e.target.id
+            event("vertex_drag",{type:"start",id:state.id})
         }
     }else if(e.type == "mouseup"){
         if(state.dragging){
             state.dragging = false
-            event("vertex_drag",{type:"end"})
+            event("vertex_drag",{type:"end",id:state.id})
         }
     }
     state.coord.x = e.clientX;
