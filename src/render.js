@@ -6,33 +6,40 @@ let utl = new Svg()
 let g = null;
 let svg = null;
 
-function set_filter_neighbors(vertex,filterName){
-    if(filterName != ""){
-        for(let [vid,v] of Object.entries(vertex.neighbors)){
-            v.svg.setAttribute("filter",`url(#${filterName})`)
-        }
+function vertex_style(v,style){
+    if(style == "default"){
+        v.svg.vertex.setAttribute("filter",`url(#f_default)`)
+    }else if(style == "hover"){
+        v.svg.vertex.setAttribute("filter",`url(#f_default)`)
+    }else if(style == "drag"){
+        v.svg.vertex.setAttribute("filter",`url(#f_default)`)
     }
 }
 
 function onVertexHover(e){
     const vertex = g.vertices[e.detail.id]
     if(e.detail.type == "enter"){
-        vertex.svg.setAttribute("filter",`url(#f_light_shadow)`)
-        set_filter_neighbors(vertex,"f_light_shadow")
+        vertex.svg.vertex.classList.add("hover")
+        for(let [vid,v] of Object.entries(vertex.neighbors)){
+            v.svg.vertex.classList.add("hover")
+        }
         console.log(`hover enter: ${vertex.label}`)
     }else if(e.detail.type == "exit"){
-        vertex.svg.setAttribute("filter",`url(#f_light)`)
-        set_filter_neighbors(vertex,"f_light")
+        vertex.svg.vertex.classList.remove("hover")
+        for(let [vid,v] of Object.entries(vertex.neighbors)){
+            v.svg.vertex.classList.remove("hover")
+        }
         console.log(`hover exit: ${vertex.label}`)
     }
 }
 
 function onVertexDrag(e){
-    const vertex = g.vertices[e.detail.id]
     if(e.detail.type == "start"){
-        vertex.svg.setAttribute("filter",`url(#f_light_shadow_h)`)
+        const svg_vertex = g.vertices[e.detail.id].svg.vertex
+        svg_vertex.classList.add("drag")
     }else if(e.detail.type == "end"){
-        vertex.svg.setAttribute("filter",`url(#f_light_shadow)`)
+        const svg_vertex = g.vertices[e.detail.id].svg.vertex
+        svg_vertex.classList.remove("drag")
     }
 }
 
@@ -43,12 +50,27 @@ class Render{
         window.addEventListener( 'vertex_drag', onVertexDrag, false );
     }
 
-    create(parent_div){
+    create(parent_div,sheet){
         let [w,h] = [parent_div.offsetWidth,parent_div.offsetHeight]
         svg = html(parent_div,/*html*/`<svg id="main_svg" xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"></svg>`);
         utl.set_parent(svg)
         this.draw()
+        this.sheet = new CSSStyleSheet()
+        this.sheet.insertRule(/*css*/`
+        .drag {
+            filter: url(#f_drag);
+        }`);
+        this.sheet.insertRule(/*css*/`
+        .hover {
+            filter: url(#f_hover);
+        }`);
+        this.sheet.insertRule(/*css*/`
+        .default {
+            filter: url(#f_default);
+        }`);
+        document.adoptedStyleSheets = [...document.adoptedStyleSheets, this.sheet];
     }
+    
 
     setViewBoxes(config){
         let check_canvas = document.createElement("canvas")
@@ -64,11 +86,10 @@ class Render{
 
     draw(){
         clear(svg)
-        utl.filter_light(svg,{id:"f_light",lx:-30,ly:-10,lz:20})
-        utl.filter_light(svg,{id:"f_high_light",lx:-30,ly:-10,lz:100})
-        utl.filter_light_shadow(svg,{id:"f_light_shadow_h",lx:-30,ly:-10,lz:20,dx:15,dy:8})
-        utl.filter_light_shadow(svg,{id:"f_light_shadow",lx:-30,ly:-10,lz:20,dx:5,dy:2})
-        const defaultFilter = "f_light"
+        utl.filter_light_shadow(svg,{id:"f_default",            lx:-30,ly:-10,lz:20,dx:5,dy:2})
+        utl.filter_light_shadow(svg,{id:"f_hover",              lx:-30,ly:-10,lz:100,dx:5,dy:2})
+        utl.filter_light_shadow(svg,{id:"f_hover_neighbors",    lx:-30,ly:-10,lz:200,dx:5,dy:2})
+        utl.filter_light_shadow(svg,{id:"f_drag",               lx:-30,ly:-10,lz:20,dx:15,dy:8})
         let g_edges = html(svg,/*html*/`<g ig="edges">`)
         for(let [eid,e] of Object.entries(g.edges)){
             let [x1,y1,x2,y2] = [e.outV.viewBox.x,e.outV.viewBox.y,e.inV.viewBox.x,e.inV.viewBox.y]
@@ -78,17 +99,18 @@ class Render{
         let g_vertices = html(svg,/*html*/`<g id="vertices"/>`)
         for(let [vid,v] of Object.entries(g.vertices)){
             let [x,y,w,h] = [-v.viewBox.width/2,-v.viewBox.height/2,v.viewBox.width,v.viewBox.height]
-            v.svg = html(g_vertices,/*html*/`<g id="vert_${v.name}"/>`)
-            html(v.svg,/*html*/`<rect  class="vertex" id="${v.id}" x="${x}" y="${y}" rx="3" width="${w}" height="${h}" fill="rgb(100,205,100)" filter="url(#${defaultFilter})" />`)
-            html(v.svg,/*html*/`<text x="0" y="0" dominant-baseline="middle" text-anchor="middle" style="pointer-events:none">${v.label}</text>`)
-            v.svg.setAttribute("transform", `translate(${v.viewBox.x},${v.viewBox.y}) rotate(${0})`);
+            v.svg = {}
+            v.svg.group = html(g_vertices,/*html*/`<g id="vert_${v.name}"/>`)
+            v.svg.vertex = html(v.svg.group,/*html*/`<rect  class="vertex default" id="${v.id}" x="${x}" y="${y}" rx="3" width="${w}" height="${h}" fill="rgb(100,205,100)" />`)
+            html(v.svg.group,/*html*/`<text x="0" y="0" dominant-baseline="middle" text-anchor="middle" style="pointer-events:none">${v.label}</text>`)
+            v.svg.group.setAttribute("transform", `translate(${v.viewBox.x},${v.viewBox.y}) rotate(${0})`);
         }
     }
 
     update(){
         for(let [vid,v] of Object.entries(g.vertices)){
             if(v.viewBox.moved){
-                v.svg.setAttribute("transform", `translate(${v.viewBox.x},${v.viewBox.y}) rotate(${v.viewBox.angle})`);
+                v.svg.group.setAttribute("transform", `translate(${v.viewBox.x},${v.viewBox.y}) rotate(${v.viewBox.angle})`);
             }
         }
         for(let [eid,e] of Object.entries(g.edges)){
