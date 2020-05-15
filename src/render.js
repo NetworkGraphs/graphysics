@@ -1,29 +1,38 @@
 import {html,clear} from "../libs/web-js-utils.js"
 import {Svg} from "../libs/svg_utils.js"
+import {Menu} from "./menu.js"
 
 let utl = new Svg()
+let menu = new Menu()
 
 let g = null;
 let svg = null;
+let config = null;
+
+function onVertexMenu(e){
+    if(e.detail.type == "start"){
+        menu.call({svg:svg,v:g.vertices[e.detail.id]})
+    }
+}
 
 function onVertexHover(e){
     const vertex = g.vertices[e.detail.id]
     if(e.detail.type == "enter"){
-        vertex.svg.vertex.classList.add("hover")
+        vertex.svg.shape.classList.add("hover")
         for(let [vid,v] of Object.entries(vertex.neighbors)){
-            v.svg.vertex.classList.add("hoverneighbor")
+            v.svg.shape.classList.add("hoverneighbor")
         }
         for(let [eid,e] of Object.entries(vertex.edges)){
-            e.svg.classList.add("hover")
+            e.svg.path.classList.add("hover")
         }
         console.log(`hover enter: ${vertex.label}`)
     }else if(e.detail.type == "exit"){
-        vertex.svg.vertex.classList.remove("hover")
+        vertex.svg.shape.classList.remove("hover")
         for(let [vid,v] of Object.entries(vertex.neighbors)){
-            v.svg.vertex.classList.remove("hoverneighbor")
+            v.svg.shape.classList.remove("hoverneighbor")
         }
         for(let [eid,e] of Object.entries(vertex.edges)){
-            e.svg.classList.remove("hover")
+            e.svg.path.classList.remove("hover")
         }
         console.log(`hover exit: ${vertex.label}`)
     }
@@ -31,10 +40,10 @@ function onVertexHover(e){
 
 function onVertexDrag(e){
     if(e.detail.type == "start"){
-        const svg_vertex = g.vertices[e.detail.id].svg.vertex
+        const svg_vertex = g.vertices[e.detail.id].svg.shape
         svg_vertex.classList.add("drag")
     }else if(e.detail.type == "end"){
-        const svg_vertex = g.vertices[e.detail.id].svg.vertex
+        const svg_vertex = g.vertices[e.detail.id].svg.shape
         svg_vertex.classList.remove("drag")
     }
 }
@@ -44,6 +53,7 @@ class Render{
         g = graph_data
         window.addEventListener( 'vertex_hover', onVertexHover, false );
         window.addEventListener( 'vertex_drag', onVertexDrag, false );
+        window.addEventListener( 'vertex_menu', onVertexMenu, false );
     }
 
     create(parent_div,sheet){
@@ -84,14 +94,16 @@ class Render{
             stroke: ${darken_color}
         }`);
         document.adoptedStyleSheets = [...document.adoptedStyleSheets, this.sheet];
+
     }
     
 
-    setViewBoxes(config){
+    setViewBoxes(cfg){
+        config = cfg
         let check_canvas = document.createElement("canvas")
         let ctx = check_canvas.getContext("2d")
-        ctx.font = config.font
-        let m = config.margin * 2
+        ctx.font = config.render.font
+        let m = config.render.margin * 2
         for(let [vid,v] of Object.entries(g.vertices)){
             let box = ctx.measureText(v.label)
             let height = box.fontBoundingBoxAscent + box.fontBoundingBoxDescent
@@ -108,17 +120,29 @@ class Render{
         for(let [eid,e] of Object.entries(g.edges)){
             let [x1,y1,x2,y2] = [e.outV.viewBox.x,e.outV.viewBox.y,e.inV.viewBox.x,e.inV.viewBox.y]
             let s_width = (1+e.weight*5)
-            e.svg = html(g_edges,/*html*/`<path class="edge default" d="M ${x1} ${y1} L ${x2} ${y2}" stroke-width="${s_width}">`)
+            e.svg = {}
+            e.svg.group = html(g_edges,/*html*/`<g id="edge_${e.label}"/>`)
+            e.svg.path = html(e.svg.group,/*html*/`<path id="e_p_${e.id}" class="edge path default" d="M ${x1} ${y1} L ${x2} ${y2}" stroke-width="${s_width}" />`)
+            e.svg.text = html(e.svg.group,/*html*/` <text class="e_text" class="edge text" >
+                                                        <textPath href="#e_p_${e.id}" startOffset="50%">
+                                                            ${e.label}
+                                                        </textPath>
+                                                    </text>`)
         }
         let g_vertices = html(svg,/*html*/`<g id="vertices"/>`)
         for(let [vid,v] of Object.entries(g.vertices)){
             let [x,y,w,h] = [-v.viewBox.width/2,-v.viewBox.height/2,v.viewBox.width,v.viewBox.height]
             v.svg = {}
             v.svg.group = html(g_vertices,/*html*/`<g id="vert_${v.name}"/>`)
-            v.svg.vertex = html(v.svg.group,/*html*/`<rect  class="vertex default" id="${v.id}" x="${x}" y="${y}" rx="3" width="${w}" height="${h}" />`)
-            html(v.svg.group,/*html*/`<text x="0" y="0" dominant-baseline="middle" text-anchor="middle" style="pointer-events:none">${v.label}</text>`)
+            v.svg.shape = html(v.svg.group,/*html*/`<rect  class="vertex shape default" id="${v.id}" x="${x}" y="${y}" rx="3" width="${w}" height="${h}" />`)
+            html(v.svg.group,/*html*/`<text class="v_text" dominant-baseline="middle" text-anchor="middle" style="pointer-events:none">${v.label}</text>`)
             v.svg.group.setAttribute("transform", `translate(${v.viewBox.x},${v.viewBox.y}) rotate(${0})`);
         }
+
+        html(svg,/*html*/`
+                <a href="${config.github.link}" target="_blank">
+                    <image x="0" y="${svg.parentElement.clientHeight-50}" height="30" xlink:href="${config.github.image}" ></image>
+                </a>`)
     }
 
     update(){
@@ -130,7 +154,7 @@ class Render{
         for(let [eid,e] of Object.entries(g.edges)){
             if(e.outV.viewBox.moved || e.inV.viewBox.moved){
                 let [x1,y1,x2,y2] = [e.outV.viewBox.x,e.outV.viewBox.y,e.inV.viewBox.x,e.inV.viewBox.y]
-                e.svg.setAttribute("d",`M ${x1} ${y1} L ${x2} ${y2}`)
+                e.svg.path.setAttribute("d",`M ${x1} ${y1} L ${x2} ${y2}`)
             }
         }
     }

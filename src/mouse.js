@@ -1,6 +1,6 @@
 import {event} from "./utils.js"
 
-let state ={over_vertex:false,id:0,coord:{x:0,y:0},offset:{x:0,y:0},dragging:false,acting:false};
+let state ={over_vertex:false,id:0,coord:{x:0,y:0},offset:{x:0,y:0},dragging:false,acting:false,menu:false};
 
 function onContext(e){
     if(e.target.tagName == "rect"){
@@ -16,7 +16,8 @@ function onMousePan(e){
     let vdx = e.offsetX - state.offset.x;
     let vdy = e.offsetY - state.offset.y;
     if(e.type == "mousemove"){
-        if(!state.dragging){//then no update for the hover state machine
+        //console.log(state)
+        if(!state.dragging && !state.menu){//then no update for the hover state machine
             if(is_vetex){
                 if(!state.over_vertex){
                     state.id = e.target.id
@@ -44,6 +45,9 @@ function onMousePan(e){
             state.dragging = true
             state.id = e.target.id
             event("vertex_drag",{type:"start",id:state.id})
+        }else if((e.buttons == 2) && is_vetex){
+            state.menu = true
+            event("vertex_menu",{type:"start",id:state.id})
         }
     }else if(e.type == "mouseup"){
         if(state.dragging){
@@ -59,6 +63,11 @@ function onMousePan(e){
     e.stopPropagation();
 }
 
+function onVertexMenu(e){
+    if(e.detail.type == "end"){
+        state.menu = false
+    }
+}
 class Mouse{
     init(element){
 
@@ -68,6 +77,7 @@ class Mouse{
         element.addEventListener( 'mouseup', onMousePan, false );
         element.addEventListener( 'mousemove', onMousePan, false );
         element.addEventListener( 'contextmenu', onContext, false );
+        window.addEventListener( 'vertex_menu', onVertexMenu, false );
     
     }
     

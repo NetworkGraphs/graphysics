@@ -1,11 +1,18 @@
 # graphysics
 Graph with Physics, No nodes overlap, morph nodes to properties and groups
 
+# Live demo
+https://networkgraphs.github.io/graphysics/
+
 # Features
 
 # Features details
 * stochastic centrality placement
-* mouse drag nodes
+* Mouse actions
+  * highlight neighbors
+  * drag node
+* edges
+  * labels on path
 
 # Features Plan
 * Update Graph
@@ -17,7 +24,6 @@ Graph with Physics, No nodes overlap, morph nodes to properties and groups
   * vertices menu
   * context menu
 * Mouse actions
-  * highlight neighbors
   * bring neighbors closer
   * reference node centrality layout of the whole graph
   * reference node / edge Gremlin query
@@ -28,10 +34,9 @@ Graph with Physics, No nodes overlap, morph nodes to properties and groups
 * Hierarchical and cross Grouping
 
 ## Plan details
-* highlight node and neighbors on mouse hover
 * edges with polylines and arrows
-* edges labels on path
 * multi-edges
+* graph direction placement left to right for edge labels read
 
 # Development details
 * Matter js as physics engine

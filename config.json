@@ -3,5 +3,9 @@
     "render":{
         "font":"20px Arial",
         "margin":3
+    },
+    "github":{
+        "image":"./media/github.png",
+        "link":"https://github.com/NetworkGraphs/graphysics"
     }
 }

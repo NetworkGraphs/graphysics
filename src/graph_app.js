@@ -21,7 +21,7 @@ class GraphApp{
 
     async load(config,parent_div){
         await gio.import_file(config.default_graph_file)
-        render.setViewBoxes(config.render)
+        render.setViewBoxes(config)
         console.log(graph)
         physics.create(parent_div)
         render.create(parent_div)
