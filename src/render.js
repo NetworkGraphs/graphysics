@@ -8,10 +8,17 @@ let menu = new Menu()
 let g = null;
 let svg = null;
 let config = null;
+let menu_v = null;
+
+function onMenuAction(e){
+    console.log(`menu action => ${e.detail.type} on ${menu_v.label}`)
+}
 
 function onVertexMenu(e){
     if(e.detail.type == "start"){
-        menu.call({svg:svg,v:g.vertices[e.detail.id]})
+        menu_v = g.vertices[e.detail.id]
+        let vb = menu_v.viewBox
+        menu.call({svg:svg,x:vb.x,y:vb.y,actions:["attract","layout","expand"]})
     }
 }
 
@@ -54,6 +61,7 @@ class Render{
         window.addEventListener( 'vertex_hover', onVertexHover, false );
         window.addEventListener( 'vertex_drag', onVertexDrag, false );
         window.addEventListener( 'vertex_menu', onVertexMenu, false );
+        window.addEventListener( 'menu_action', onMenuAction, false );
     }
 
     create(parent_div,sheet){
@@ -61,37 +69,45 @@ class Render{
         svg = html(parent_div,/*html*/`<svg id="main_svg" xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"></svg>`);
         utl.set_parent(svg)
         this.draw()
-        const color             = "hsl(140, 80%, 50%)"
-        const highlight_color   = "hsl(140, 80%, 90%)"
-        const darken_color      = "hsl(140, 80%, 33%)"
+        const select_color    = "hsl(140, 80%, 50%)"
+        const default_color   = "hsl(140, 80%, 90%)"
+        const darken_color    = "hsl(140, 80%, 33%)"
         this.sheet = new CSSStyleSheet()
         this.sheet.insertRule(/*css*/`
         .vertex.drag {
             filter: url(#f_drag);
-            fill :  ${highlight_color}
+            fill :  ${select_color}
         }`);
         this.sheet.insertRule(/*css*/`
         .vertex.hover {
             filter: url(#f_default);
-            fill :  ${highlight_color}
+            fill :  ${select_color}
         }`);
         this.sheet.insertRule(/*css*/`
         .vertex.hoverneighbor {
             filter: url(#f_default);
-            fill :  ${highlight_color}
+            fill :  ${select_color}
         }`);
         this.sheet.insertRule(/*css*/`
         .vertex.default {
             filter: url(#f_default);
-            fill :  ${color}
+            fill :  ${default_color}
+        }`);
+        this.sheet.insertRule(/*css*/`
+        .v_text {
+            font: ${config.render.font}
+        }`);
+        this.sheet.insertRule(/*css*/`
+        .e_text {
+            font: ${config.render.font}
         }`);
         this.sheet.insertRule(/*css*/`
         .edge.hover {
-            stroke: ${color}
+            stroke: ${select_color}
         }`);
         this.sheet.insertRule(/*css*/`
         .edge.default {
-            stroke: ${darken_color}
+            stroke: ${default_color}
         }`);
         document.adoptedStyleSheets = [...document.adoptedStyleSheets, this.sheet];
 
@@ -103,11 +119,12 @@ class Render{
         let check_canvas = document.createElement("canvas")
         let ctx = check_canvas.getContext("2d")
         ctx.font = config.render.font
-        let m = config.render.margin * 2
+        let vm = config.render.v_margin * 2
+        let hm = config.render.h_margin * 2
         for(let [vid,v] of Object.entries(g.vertices)){
             let box = ctx.measureText(v.label)
             let height = box.fontBoundingBoxAscent + box.fontBoundingBoxDescent
-            v.viewBox = {width:box.width+m,height:height+m}
+            v.viewBox = {width:box.width+hm,height:height+vm}
         }
     }
 

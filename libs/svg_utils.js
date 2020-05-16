@@ -1,4 +1,4 @@
-import {defined,html} from "./web-js-utils.js"
+import {defined,html,html_tag} from "./web-js-utils.js"
 
 class Svg{
     constructor(svg_element){
@@ -31,6 +31,58 @@ class Svg{
         return html(this.el,
         /*html*/`<circle cx=${x} cy=${y} r="3" stroke="black" stroke-width="3" fill="red" />`
         );
+    }
+    
+    pie_dash(parent,x,y,radius_start,radius_stop,angle_start,angle_stop){
+        const circ_rad = (radius_start+radius_stop) / 2
+        const stroke_width = (radius_stop - radius_start)
+        const circ_length = 2 * Math.PI * circ_rad
+        const dash_length = (angle_stop - angle_start) * circ_length
+        const dash_start = angle_start * circ_length
+        return html_tag(parent,"circle",/*html*/`
+        <circle cx=${x} cy=${y} r="${circ_rad}" 
+            stroke-dasharray="${dash_length} ${circ_length}" 
+            stroke-dashoffset="${dash_start}" 
+            stroke-width="${stroke_width}" 
+            stroke="rgba(0,100,0,0.5)" 
+            fill="rgba(0,0,0,0)" />
+        `);
+    }
+
+    /**
+     * 
+     * @param {*} parent : parent SVG element
+     * @param {*} x : x coordinates of the pie arcs center
+     * @param {*} y : y coordinates of the pie arcs center
+     * @param {*} radius_start : small radius
+     * @param {*} radius_stop : big radius
+     * @param {*} angle_start : beginning in a scale of [0,1] for the whole 360° circle
+     * @param {*} angle_stop  : stop in a scale of [0,1] for the whole 360° circle
+     * @param {*} color : filling color
+     */
+    pie(parent,x,y,radius_start,radius_stop,angle_start,angle_stop,margin){
+        const s_marg = margin * radius_stop / radius_start
+        const small_start_x = x + radius_start * Math.cos((angle_start + s_marg) * 2 * Math.PI)
+        const small_start_y = y + radius_start * Math.sin((angle_start + s_marg) * 2 * Math.PI)
+        const small_stop_x  = x + radius_start * Math.cos((angle_stop  - s_marg)  * 2 * Math.PI)
+        const small_stop_y  = y + radius_start * Math.sin((angle_stop  - s_marg)  * 2 * Math.PI)
+
+        const big_start_x   = x + radius_stop  * Math.cos((angle_start + margin) * 2 * Math.PI)
+        const big_start_y   = y + radius_stop  * Math.sin((angle_start + margin) * 2 * Math.PI)
+        const big_stop_x    = x + radius_stop  * Math.cos((angle_stop - margin)  * 2 * Math.PI)
+        const big_stop_y    = y + radius_stop  * Math.sin((angle_stop - margin)  * 2 * Math.PI)
+
+        //(rx ry x-axis-rotation large-arc-flag sweep-flag x y)
+        return html_tag(parent,"path",/*html*/`
+        <path   d=" M ${small_start_x} ${small_start_y} 
+                    A ${radius_start},${radius_start} 0,0,1 ${small_stop_x},${small_stop_y}
+                    L ${big_stop_x} ${big_stop_y} 
+                    A ${radius_stop},${radius_stop} 0,0,0 ${big_start_x},${big_start_y}
+                    L ${small_start_x} ${small_start_y} 
+                    Z
+                    "
+                stroke-width="0" />
+        `)
     }
     
     circle_p_id(parent,x,y,id){

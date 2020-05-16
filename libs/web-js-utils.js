@@ -37,7 +37,6 @@ function htmls(parent,html_text){
 }
 
 function html_tag(parent,tagName,html_text){
-    console.warn("html_tag() deprecated, replace with html()")
     parent.insertAdjacentHTML("beforeend",html_text);
     let elements = parent.getElementsByTagName(tagName);
     let res_svg =  elements[elements.length-1];
@@ -96,6 +95,19 @@ function clear(element){
     })
 }
 
+function remove_sheet(sheet){
+    let bkp_sheets = document.adoptedStyleSheets
+    document.adoptedStyleSheets = []
+    for(let i=0;i<bkp_sheets.length-1;i++){
+        if(bkp_sheets[i] != sheet){
+            document.adoptedStyleSheets = [...document.adoptedStyleSheets,bkp_sheets[i]];
+        }
+    }
+}
+
+function add_sheet(sheet){
+    document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
+}
 
 
 export{
@@ -113,5 +125,7 @@ export{
     css,
     html_tag,
     htmls,
-    clear
+    clear,
+    add_sheet,
+    remove_sheet
 }
