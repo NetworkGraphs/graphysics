@@ -1,4 +1,4 @@
-import {html,html_tag,add_sheet,remove_sheet,send} from "../libs/web-js-utils.js"
+import {html,html_tag,add_sheet,remove_sheet} from "../libs/web-js-utils.js"
 import {event} from "./utils.js"
 import {Svg} from "../libs/svg_utils.js"
 
@@ -51,13 +51,17 @@ function onContext(e){
 
 class Menu{
     call(Params){
+        const circle_radius = 80
+        const pie_radius_start = 20
+        const pie_radius_end = 90
+
         vertex = Params.v
         svg = Params.svg
         let [x,y] = [Params.x,Params.y]
         menu_svg = html(svg,/*html*/`<g id="g_menu"/>`)
         html_tag(menu_svg,"circle",/*html*/`
         <circle class="svg_menu" cx="${x}" cy="${y}" r="10" fill="rgba(120,160,200,0.5)" >
-            <animate attributeName="r" begin="0s" values="10;80" keyTimes="0;1" calcMode="spline" keySplines="0 .75 .25 1" dur="300ms" repeatCount="1" fill="freeze"/>
+            <animate attributeName="r" begin="0s" values="10;${circle_radius}" keyTimes="0;1" calcMode="spline" keySplines="0 .75 .25 1" dur="300ms" repeatCount="1" fill="freeze"/>
         </circle>`)
         menu_svg.getElementsByTagName("animate")[0].beginElement()
         state.active = true
@@ -65,20 +69,25 @@ class Menu{
         menu_svg.addEventListener( 'mousedown', onMouseDown, false );
         menu_svg.addEventListener( 'contextmenu', onContext, false );
 
-        const pie_radius_start = 20
-        const pie_radius_end = 70
         const len = Params.actions.length
+        let buttons = {}
+        let texts = {}
         Params.actions.forEach((a,i)=>{
             const start = i / len
             const stop = (i+1) / len
             const margin = 0.01
+            let pie = utl.pie(menu_svg,x,y,pie_radius_start,pie_radius_end,start,stop,margin)
+            buttons[a] = pie
+            pie.setAttribute("data-name",a)
+            pie.setAttribute("visibility","hidden")
+            pie.classList.add("pie_element")
+            let [tx,ty] = angle_pos((start+stop)/2,(pie_radius_start+pie_radius_end)/2)
+            texts[a] = html(menu_svg,/*html*/`<text x="${x+tx}" y="${y+ty}" class="m_text" dominant-baseline="middle" text-anchor="middle" style="pointer-events:none" visibility="hidden">${a}</text>`)
+        })
+        Params.actions.forEach((action,i)=>{
             setTimeout(()=>{
-                let pie = utl.pie(menu_svg,x,y,pie_radius_start,pie_radius_end,start,stop,margin)
-                pie.setAttribute("data-name",a)
-                pie.classList.add("pie_element")
-                pie.addEventListener( 'click', (e)=>{send("menu_action",{type:e.target.getAttribute("data-name")} )}, false );
-                let [tx,ty] = angle_pos((start+stop)/2,(pie_radius_start+pie_radius_end)/2)
-                html(menu_svg,/*html*/`<text x="${x+tx}" y="${y+ty}" class="m_text" dominant-baseline="middle" text-anchor="middle" style="pointer-events:none">${a}</text>`)
+                buttons[action].setAttribute("visibility","visible")
+                texts[action].setAttribute("visibility","visible")
             },200+i*50)
         })
         sheet = new CSSStyleSheet()
@@ -100,7 +109,8 @@ class Menu{
             color:hsl(240, 80%, 65%)
         }`)
         add_sheet(sheet)
-}
+        return buttons
+    }
 }
 
 export{Menu};

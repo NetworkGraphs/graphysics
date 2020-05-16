@@ -174,7 +174,7 @@ function neighbors_walls_cost(sample,seeds,w,h,walls){
 }
 
 function select_vertex_position(v,placed,width,height,debug=false){
-    console.time("select_pos")
+    //console.time("select_pos")
     g_debug = debug
     let best_index = -1
     let best_cost = Number.MAX_VALUE;
@@ -203,7 +203,7 @@ function select_vertex_position(v,placed,width,height,debug=false){
     let best_sample = samples[best_index]
     v.viewBox.x = best_sample.x
     v.viewBox.y = best_sample.y
-    console.timeEnd("select_pos")
+    //console.timeEnd("select_pos")
     return [best_sample.x,best_sample.y]
 
 }

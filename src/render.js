@@ -1,4 +1,4 @@
-import {html,clear} from "../libs/web-js-utils.js"
+import {html,clear,send} from "../libs/web-js-utils.js"
 import {Svg} from "../libs/svg_utils.js"
 import {Menu} from "./menu.js"
 
@@ -9,16 +9,35 @@ let g = null;
 let svg = null;
 let config = null;
 let menu_v = null;
+let attraction = false;
 
 function onMenuAction(e){
-    console.log(`menu action => ${e.detail.type} on ${menu_v.label}`)
+    console.log(`${e.detail.v.label} => ${e.detail.action}:${e.detail.type}`)
 }
 
 function onVertexMenu(e){
     if(e.detail.type == "start"){
         menu_v = g.vertices[e.detail.id]
         let vb = menu_v.viewBox
-        menu.call({svg:svg,x:vb.x,y:vb.y,actions:["attract","layout","expand"]})
+        let buttons = menu.call({svg:svg,x:vb.x,y:vb.y,actions:["attract","layout","pin"]})
+        buttons["pin"].addEventListener(    'click', (e)=>{send("menu_action",{type:"click",action:e.target.getAttribute("data-name"),v:menu_v} )}, false );
+        buttons["layout"].addEventListener( 'click', (e)=>{send("menu_action",{type:"click",action:e.target.getAttribute("data-name"),v:menu_v} )}, false );
+        buttons["attract"].addEventListener('mousedown', (e)=>{
+            send("menu_action",{type:"start",action:e.target.getAttribute("data-name"),v:menu_v} )
+            attraction = true
+        }, false );
+        buttons["attract"].addEventListener('mouseup', (e)=>{
+            send("menu_action",{type:"end",action:e.target.getAttribute("data-name"),v:menu_v} )
+            attraction = false
+        }, false );
+        buttons["attract"].addEventListener('mouseleave', (e)=>{
+            send("menu_action",{type:"end",action:e.target.getAttribute("data-name"),v:menu_v} )
+            attraction = false
+        }, false );
+    }else if(e.detail.type == "end"){
+        if(attraction){
+            send("menu_action",{type:"end",action:"attract",v:menu_v} )
+        }
     }
 }
 
