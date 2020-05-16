@@ -11,16 +11,24 @@ let config = null;
 let menu_v = null;
 let attraction = false;
 
+
 function onMenuAction(e){
-    console.log(`${e.detail.v.label} => ${e.detail.action}:${e.detail.type}`)
+    if(e.detail.action == "pin"){
+        e.detail.v.pinned = true
+        e.detail.v.svg.shape.classList.add("pinned")
+    }else if(e.detail.action == "unpin"){
+        e.detail.v.pinned = false
+        e.detail.v.svg.shape.classList.remove("pinned")
+    }
 }
 
 function onVertexMenu(e){
     if(e.detail.type == "start"){
         menu_v = g.vertices[e.detail.id]
         let vb = menu_v.viewBox
-        let buttons = menu.call({svg:svg,x:vb.x,y:vb.y,actions:["attract","layout","pin"]})
-        buttons["pin"].addEventListener(    'click', (e)=>{send("menu_action",{type:"click",action:e.target.getAttribute("data-name"),v:menu_v} )}, false );
+        let pin_name = menu_v.pinned?"unpin":"pin"
+        let buttons = menu.call({svg:svg,x:vb.x,y:vb.y,actions:["attract","layout",pin_name]})
+        buttons[pin_name].addEventListener(    'click', (e)=>{send("menu_action",{type:"click",action:e.target.getAttribute("data-name"),v:menu_v} )}, false );
         buttons["layout"].addEventListener( 'click', (e)=>{send("menu_action",{type:"click",action:e.target.getAttribute("data-name"),v:menu_v} )}, false );
         buttons["attract"].addEventListener('mousedown', (e)=>{
             send("menu_action",{type:"start",action:e.target.getAttribute("data-name"),v:menu_v} )
@@ -93,6 +101,11 @@ class Render{
         const darken_color    = "hsl(140, 80%, 33%)"
         this.sheet = new CSSStyleSheet()
         this.sheet.insertRule(/*css*/`
+        .vertex.pinned {
+            filter: url(#f_pinned);
+            fill :  hsl(100,80%,60%)
+        }`);
+        this.sheet.insertRule(/*css*/`
         .vertex.drag {
             filter: url(#f_drag);
             fill :  ${select_color}
@@ -149,6 +162,7 @@ class Render{
 
     draw(){
         clear(svg)
+        utl.filter_light(       svg,{id:"f_pinned",            lx:-20,ly:-10,lz:10})
         utl.filter_light_shadow(svg,{id:"f_default",            lx:-20,ly:-10,lz:10,dx:5,dy:2})
         utl.filter_light_shadow(svg,{id:"f_hover",              lx:-20,ly:-10,lz:10,dx:5,dy:2})
         utl.filter_light_shadow(svg,{id:"f_drag",               lx:-20,ly:-10,lz:10,dx:15,dy:8})
@@ -192,6 +206,9 @@ class Render{
                 let [x1,y1,x2,y2] = [e.outV.viewBox.x,e.outV.viewBox.y,e.inV.viewBox.x,e.inV.viewBox.y]
                 e.svg.path.setAttribute("d",`M ${x1} ${y1} L ${x2} ${y2}`)
             }
+        }
+        for(let [vid,v] of Object.entries(g.vertices)){
+            v.viewBox.moved = false
         }
     }
 

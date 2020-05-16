@@ -27,7 +27,7 @@ class GraphApp{
         render.create(parent_div)
         mouse.init(parent_div)
     }
-S
+
     run(){
         physics.run()
         render.update()
