@@ -1,4 +1,4 @@
-import {html,html_tag,add_sheet,remove_sheet} from "../libs/web-js-utils.js"
+import {html,html_tag,add_sheet,remove_sheet,defined} from "../libs/web-js-utils.js"
 import {event} from "./utils.js"
 import {Svg} from "../libs/svg_utils.js"
 
@@ -6,6 +6,8 @@ let utl = new Svg()
 
 let svg = null;
 let menu_svg = null;
+let buttons = {};
+let texts = {};
 let vertex = null;
 
 let state = {active:false}
@@ -38,10 +40,12 @@ function onMouseLeave(e){
     remove()
 }
 
-function onMouseDown(e){
-    if(e.buttons == 2){
+function onPointerDown(e){
+    let pointer_2 = defined(e.buttons)?(e.buttons == 2):(e.touches.length == 2)
+    if(pointer_2 || (!e.target.classList.contains("svg_menu"))){
         remove()
     }
+    console.log(e.target.tagName)
 }
 
 function onContext(e){
@@ -66,12 +70,13 @@ class Menu{
         menu_svg.getElementsByTagName("animate")[0].beginElement()
         state.active = true
         menu_svg.addEventListener( 'mouseleave', onMouseLeave, false );
-        menu_svg.addEventListener( 'mousedown', onMouseDown, false );
+        svg.addEventListener( 'mousedown', onPointerDown, false );
+        svg.addEventListener( 'touchstart', onPointerDown, false );
         menu_svg.addEventListener( 'contextmenu', onContext, false );
 
         const len = Params.actions.length
-        let buttons = {}
-        let texts = {}
+        buttons = {}
+        texts = {}
         Params.actions.forEach((a,i)=>{
             const start = i / len
             const stop = (i+1) / len
@@ -80,6 +85,7 @@ class Menu{
             buttons[a] = pie
             pie.setAttribute("data-name",a)
             pie.setAttribute("visibility","hidden")
+            pie.classList.add("svg_menu")
             pie.classList.add("pie_element")
             let [tx,ty] = angle_pos((start+stop)/2,(pie_radius_start+pie_radius_end)/2)
             texts[a] = html(menu_svg,/*html*/`<text x="${x+tx}" y="${y+ty}" class="m_text" dominant-baseline="middle" text-anchor="middle" style="pointer-events:none" visibility="hidden">${a}</text>`)
@@ -109,6 +115,15 @@ class Menu{
             color:hsl(240, 80%, 65%)
         }`)
         add_sheet(sheet)
+        return buttons
+    }
+    update_action(old_action_name,new_action_name){
+        let pie = buttons[old_action_name]
+        pie.setAttribute("data-name",new_action_name)
+        let text = texts[old_action_name]
+        text.innerHTML = new_action_name
+        buttons[new_action_name] = pie
+        texts[new_action_name] = text
         return buttons
     }
 }

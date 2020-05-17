@@ -72,7 +72,9 @@ function onMousePan(e){
     if(!["touchstart","touchend","touchmove"].includes(e.type)){
         e.preventDefault();
     }
-    e.stopPropagation();
+    if(!["touchstart","mousedown"].includes(e.type)){
+        e.stopPropagation();
+    }
 }
 
 function onVertexMenu(e){

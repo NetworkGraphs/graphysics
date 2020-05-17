@@ -11,14 +11,15 @@ let config = null;
 let menu_v = null;
 let attraction = false;
 
-
 function onMenuAction(e){
     if(e.detail.action == "pin"){
         e.detail.v.pinned = true
         e.detail.v.svg.shape.classList.add("pinned")
+        menu.update_action("pin","unpin")
     }else if(e.detail.action == "unpin"){
         e.detail.v.pinned = false
         e.detail.v.svg.shape.classList.remove("pinned")
+        menu.update_action("unpin","pin")
     }
 }
 
