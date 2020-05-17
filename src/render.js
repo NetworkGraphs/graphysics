@@ -1,4 +1,4 @@
-import {html,clear,send} from "../libs/web-js-utils.js"
+import {html,clear,send, defined} from "../libs/web-js-utils.js"
 import {Svg} from "../libs/svg_utils.js"
 import {Menu} from "./menu.js"
 
@@ -127,11 +127,11 @@ class Render{
         }`);
         this.sheet.insertRule(/*css*/`
         .v_text {
-            font: ${config.render.font}
+            font: ${config.render.font_height_px}px ${config.render.font}
         }`);
         this.sheet.insertRule(/*css*/`
         .e_text {
-            font: ${config.render.font}
+            font: ${config.render.font_height_px}px ${config.render.font}
         }`);
         this.sheet.insertRule(/*css*/`
         .edge.hover {
@@ -150,12 +150,17 @@ class Render{
         config = cfg
         let check_canvas = document.createElement("canvas")
         let ctx = check_canvas.getContext("2d")
-        ctx.font = config.render.font
+        ctx.font = `${config.render.font_height_px}px ${config.render.font}`
         let vm = config.render.v_margin * 2
         let hm = config.render.h_margin * 2
         for(let [vid,v] of Object.entries(g.vertices)){
             let box = ctx.measureText(v.label)
-            let height = box.fontBoundingBoxAscent + box.fontBoundingBoxDescent
+            let height
+            if(defined(box.fontBoundingBoxAscent) && defined(box.fontBoundingBoxDescent)){
+                height = box.fontBoundingBoxAscent + box.fontBoundingBoxDescent
+            }else{
+                height = config.render.font_height_px
+            }
             v.viewBox = {width:box.width+hm,height:height+vm}
         }
     }

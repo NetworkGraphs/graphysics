@@ -1,7 +1,8 @@
 {
     "default_graph_file":"./data/GraphSON_blueprints.json",
     "render":{
-        "font":"16px Verdana",
+        "font":"Verdana",
+        "font_height_px":16,
         "v_margin":5,
         "h_margin":10
     },
