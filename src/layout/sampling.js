@@ -200,11 +200,21 @@ function select_vertex_position(v,placed,width,height,debug=false){
     if(debug){
         console.log(`best_cost = ${best_cost.toFixed(2)}`)
     }
-    let best_sample = samples[best_index]
-    v.viewBox.x = best_sample.x
-    v.viewBox.y = best_sample.y
-    //console.timeEnd("select_pos")
-    return [best_sample.x,best_sample.y]
+    if(best_index == -1){
+        console.error("sampling failed")
+        let [x,y] = [   Math.round(v.viewBox.width/2 + (Math.random()*(width-v.viewBox.width))),
+                        Math.round(v.viewBox.height/2 + (Math.random()*(height-v.viewBox.height)))
+                    ]
+        let text = document.createTextNode(`sampling failed ; width=${width}; height=${height} returning (${x},${y})   `);
+        document.body.appendChild(text)
+        return [x,y]
+    }else{
+        let best_sample = samples[best_index]
+        v.viewBox.x = best_sample.x
+        v.viewBox.y = best_sample.y
+        //console.timeEnd("select_pos")
+        return [best_sample.x,best_sample.y]
+    }
 
 }
 
