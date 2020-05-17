@@ -66,21 +66,6 @@ function intersect(e1,e2){
     }
 }
 
-function centrality(vertices){
-    let central = []
-    for(let [vid,v] of Object.entries(vertices)){
-        //could here add configurable centrality with weights
-        central.push({c:Object.keys(v.edges).length,v:v})
-    }
-    central.sort((a,b)=>{return (b.c - a.c)})
-
-    let sorted = []
-    central.forEach((obj)=>{
-        sorted.push(obj.v)
-    })
-    return sorted
-}
-
 function samples_in_rect(nb,w,h,box_w,box_h){
     let res = []
     for(let i = 0;i<nb; i++){
@@ -107,12 +92,14 @@ function walls_distance(point,w,h){
     return Math.min(...walls_dist)
 }
 
-function get_placed_edges(placed_vertices){
+function get_placed_others_edges(sample,placed_vertices){
     let edges = []
     for(let [vid,v] of Object.entries(placed_vertices)){
         for(let [eid,e] of Object.entries(v.edges)){
             if(placed_vertices.includes(e.inV) && placed_vertices.includes(e.outV)){
-                if(!edges.includes(e)){
+                let own_edge = ((e.inV == sample)||(e.outV == sample))
+                //discard if own edge, and not if already in
+                if(!own_edge && !edges.includes(e)){
                     edges.push(e)
                 }
             }
@@ -145,13 +132,12 @@ function copy_without_neighbors(sample,placed_vertices){
 }
 
 function interset_cost(sample,placed_vertices){
-    const placed_not_neighbors = copy_without_neighbors(sample,placed_vertices)
-    const edges_not_of_neighbors = get_placed_edges(placed_not_neighbors)
+    const others_edges = get_placed_others_edges(sample,placed_vertices)//not including own
     const own_tobe_placed_edges = get_own_tobe_placed_edges(sample,placed_vertices)
-    for(let [oeid,oe] of Object.entries(own_tobe_placed_edges)){
-        for(let [eid,e] of Object.entries(edges_not_of_neighbors)){
-            if(intersect(oe,e)){
-                /*stop processing and */return 1
+    for(let [oeid,own_e] of Object.entries(own_tobe_placed_edges)){
+        for(let [eid,e] of Object.entries(others_edges)){
+            if(intersect(own_e,e)){
+                /*stop processing and */return 10
             }
         }
     }
@@ -179,7 +165,7 @@ function select_vertex_position(v,placed,width,height,debug=false){
     let best_index = -1
     let best_cost = Number.MAX_VALUE;
     let i_costs = []
-    const nb_samples = 100
+    const nb_samples = 500
     let samples = samples_in_rect(nb_samples,width,height,v.viewBox.width,v.viewBox.height)
     for(let i=0;i<nb_samples;i++){
         const s = samples[i]
@@ -192,7 +178,7 @@ function select_vertex_position(v,placed,width,height,debug=false){
         i_costs.push(i_cost)
         const cost = dist_cost + i_cost
         if(debug){
-            console.log(`total:${cost.toFixed(2)} , dist_cost: ${dist_cost.toFixed(2)} , i_cost:${i_cost}`)
+            console.log(`${i}) total:${cost.toFixed(2)} , dist_cost: ${dist_cost.toFixed(2)} , i_cost:${i_cost}`)
         }
         if(cost < best_cost){
             best_index = i
@@ -200,7 +186,7 @@ function select_vertex_position(v,placed,width,height,debug=false){
         }
     }
     if(debug){
-        console.log(`best_cost = ${best_cost.toFixed(2)}`)
+        console.log(`best_cost = ${best_cost.toFixed(2)} at best_index = ${best_index}`)
     }
     if(best_index == -1){
         console.warning("sampling failed")
@@ -214,7 +200,7 @@ function select_vertex_position(v,placed,width,height,debug=false){
         //placed.forEach((p)=>{msg += `${p.label} `})
         //console.log(msg)
         //console.log(i_costs)
-        if(i_costs[best_index] == 1){
+        if(i_costs[best_index] != 0){
             console.log(`i_cost failed for ${v.label}`)
         }
         let best_sample = samples[best_index]
@@ -226,4 +212,4 @@ function select_vertex_position(v,placed,width,height,debug=false){
 
 }
 
-export {centrality,select_vertex_position};
+export {select_vertex_position};
