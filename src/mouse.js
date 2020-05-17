@@ -1,4 +1,5 @@
 import {event} from "./utils.js"
+import { defined } from "../libs/web-js-utils.js";
 
 let state ={over_vertex:false,id:0,coord:{x:0,y:0},offset:{x:0,y:0},dragging:false,acting:false,menu:false};
 
@@ -9,12 +10,16 @@ function onContext(e){
 
 function onMousePan(e){
     const is_vertex = e.target.classList.contains("vertex")
-    let dx = e.clientX - state.coord.x;
-    let dy = e.clientY - state.coord.y;
-    let vdx = e.offsetX - state.offset.x;
-    let vdy = e.offsetY - state.offset.y;
-    if(e.type == "mousemove"){
-        //console.log(state)
+    let pointe_1 = defined(e.buttons)?(e.buttons == 1):(e.touches.length == 1)
+    let pointe_2 = defined(e.buttons)?(e.buttons == 2):(e.touches.length == 2)
+    let pointer_x = defined(e.offsetX)?e.offsetX:   ((e.touches.length>0)?(e.touches[0].pageX):state.offset.x)
+    let pointer_y = defined(e.offsetY)?e.offsetY:   ((e.touches.length>0)?(e.touches[0].pageY):state.offset.y)
+    let vdx = pointer_x - state.offset.x;
+    let vdy = pointer_y - state.offset.y;
+    //console.log(`tx:${vdx},ty:${vdy}    px:${e.touches[0].PageX},py:${e.touches[0].PageY}`)
+    //console.log(e)
+    if(["mousemove","touchmove"].includes(e.type)){
+        //console.log(`dragging:${state.dragging} , over_vertex:${state.over_vertex}`)
         if(!state.dragging && !state.menu){//then no update for the hover state machine
             if(is_vertex){
                 if(!state.over_vertex){
@@ -35,36 +40,38 @@ function onMousePan(e){
                 }
             }
         }
-        if((e.buttons == 1) && state.dragging){
+        if(pointe_1 && state.dragging){
+            //console.log(e)
+            //console.log(`tx:${vdx},ty:${vdy}`)
             event("vertex_drag",{type:"move",tx:vdx,ty:vdy})
         }
-        if(!is_vertex && (e.buttons != 1) && (e.buttons == 2) && !state.menu){
+        if(!is_vertex && !pointe_1 && pointe_2 && !state.menu){
             if(state.over_vertex){
                 state.over_vertex = false
                 event("vertex_hover",{type:"exit",id:state.id})
             }
         }
-    }else if(e.type == "mousedown"){
-        if((e.buttons == 1) && is_vertex){
+    }else if(["mousedown","touchstart"].includes(e.type)){
+        if(pointe_1 && is_vertex){
             state.dragging = true
             state.id = e.target.id
             event("vertex_drag",{type:"start",id:state.id})
-        }else if((e.buttons == 2) && is_vertex){
+        }else if(pointe_2 && is_vertex){
             state.menu = true
             state.id = e.target.id
             event("vertex_menu",{type:"start",id:state.id})
         }
-    }else if(e.type == "mouseup"){
+    }else if(["mouseup","touchend"].includes(e.type)){
         if(state.dragging){
             state.dragging = false
             event("vertex_drag",{type:"end",id:state.id})
         }
     }
-    state.coord.x = e.clientX;
-    state.coord.y = e.clientY;
-    state.offset.x = e.offsetX;
-    state.offset.y = e.offsetY;
-    e.preventDefault();
+    state.offset.x = pointer_x;
+    state.offset.y = pointer_y;
+    if(!["touchstart","touchend","touchmove"].includes(e.type)){
+        e.preventDefault();
+    }
     e.stopPropagation();
 }
 
@@ -77,11 +84,12 @@ class Mouse{
     init(element){
 
         element.addEventListener( 'touchstart', onMousePan, false );
-        element.addEventListener( 'touchend', onMousePan, false );
-        element.addEventListener( 'mousedown', onMousePan, false );
-        element.addEventListener( 'mouseup', onMousePan, false );
-        element.addEventListener( 'mousemove', onMousePan, false );
-        element.addEventListener( 'contextmenu', onContext, false );
+        element.addEventListener( 'touchend',   onMousePan, false );
+        element.addEventListener( 'touchmove',  onMousePan, false );
+        element.addEventListener( 'mousedown',  onMousePan, false );
+        element.addEventListener( 'mouseup',    onMousePan, false );
+        element.addEventListener( 'mousemove',  onMousePan, false );
+        element.addEventListener( 'contextmenu',onContext, false );
         window.addEventListener( 'vertex_menu', onVertexMenu, false );
     
     }
