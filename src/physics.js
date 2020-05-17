@@ -1,5 +1,5 @@
-import {centrality,select_vertex_position} from "./layout/sampling.js"
 import { defined } from "../libs/web-js-utils.js";
+import { Layout } from "./layout.js";
 
 let g = null;
 let engine = null;
@@ -8,6 +8,7 @@ let last_run = 0;
 let last_delta = 0;
 let drag = {}
 let to_run_layout = false
+let layout = new Layout()
 
 function get_delta_correction(){
     let delta = 1000/60;            //used as default for first interations only
@@ -69,35 +70,30 @@ function onMenuAction(e){
     if(e.detail.action == "layout"){
         e.detail.v.pinned = true
         e.detail.v.svg.shape.classList.add("pinned")
-        layout(false)
+        layout.propagate_neighbors(g,{width:width,height:height,v:e.detail.v})
+        place_bodies()
     }
 }
 
-function layout(create = true){
-    let central_order = centrality(g.vertices)
-    let already_placed = []
+function create_bodies(){
     for(let [vid,v] of Object.entries(g.vertices)){
-        if(defined(v.pinned) && v.pinned){
-            already_placed.push(v)
-            central_order.splice(central_order.indexOf(v),1)
-        }
+        v.body = Matter.Bodies.rectangle(v.viewBox.x,v.viewBox.y,v.viewBox.width,v.viewBox.height,
+            {id:v.id,label:v.label,mass:5,frictionAir:0.3}
+            )
+        Matter.World.addBody(engine.world,v.body)
+        v.viewBox.moved = true
     }
-    
-    for(let [vid,v] of Object.entries(central_order)){
-        [v.viewBox.x,v.viewBox.y] = select_vertex_position(v,already_placed,width,height)//for debug : ,(v.id==6)
-        already_placed.push(v)
-        if(create){
-            v.body = Matter.Bodies.rectangle(v.viewBox.x,v.viewBox.y,v.viewBox.width,v.viewBox.height,
-                {id:v.id,label:v.label,mass:5,frictionAir:0.3}
-                )
-            Matter.World.addBody(engine.world,v.body)
-            v.viewBox.moved = true
-        }else{
+}
+
+function place_bodies(){
+    for(let [vid,v] of Object.entries(g.vertices)){
+        if(!defined(v.pinned) || !v.pinned){
             Matter.Body.setPosition(v.body,Matter.Vector.create(v.viewBox.x,v.viewBox.y))
             v.viewBox.moved |= true
         }
     }
 }
+
 class Physics{
     constructor(graph_data){
         g = graph_data
@@ -111,7 +107,8 @@ class Physics{
     create(parent_div){
         width = parent_div.offsetWidth
         height = parent_div.offsetHeight
-        layout(true)
+        layout.centrals_first(g,{width:width,height:height})
+        create_bodies()
     }
 
     run(){

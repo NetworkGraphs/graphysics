@@ -45,7 +45,6 @@ function onPointerDown(e){
     if(pointer_2 || (!e.target.classList.contains("svg_menu"))){
         remove()
     }
-    console.log(e.target.tagName)
 }
 
 function onContext(e){

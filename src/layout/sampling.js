@@ -178,6 +178,7 @@ function select_vertex_position(v,placed,width,height,debug=false){
     g_debug = debug
     let best_index = -1
     let best_cost = Number.MAX_VALUE;
+    let i_costs = []
     const nb_samples = 100
     let samples = samples_in_rect(nb_samples,width,height,v.viewBox.width,v.viewBox.height)
     for(let i=0;i<nb_samples;i++){
@@ -188,6 +189,7 @@ function select_vertex_position(v,placed,width,height,debug=false){
         v.viewBox.x = s.x
         v.viewBox.y = s.y
         const i_cost = interset_cost(v,placed)
+        i_costs.push(i_cost)
         const cost = dist_cost + i_cost
         if(debug){
             console.log(`total:${cost.toFixed(2)} , dist_cost: ${dist_cost.toFixed(2)} , i_cost:${i_cost}`)
@@ -207,6 +209,14 @@ function select_vertex_position(v,placed,width,height,debug=false){
                     ]
         return [x,y]
     }else{
+        //console.log(`best_index for  ${v.label} : ${best_index}`)
+        //let msg = "placed : "
+        //placed.forEach((p)=>{msg += `${p.label} `})
+        //console.log(msg)
+        //console.log(i_costs)
+        if(i_costs[best_index] == 1){
+            console.log(`i_cost failed for ${v.label}`)
+        }
         let best_sample = samples[best_index]
         v.viewBox.x = best_sample.x
         v.viewBox.y = best_sample.y
