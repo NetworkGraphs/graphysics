@@ -23,8 +23,8 @@ class GraphApp{
         await gio.import_file(config.default_graph_file)
         render.setViewBoxes(config)
         console.log(graph)
-        physics.create(parent_div)
         render.create(parent_div)
+        physics.create(parent_div)
         mouse.init(parent_div)
     }
 

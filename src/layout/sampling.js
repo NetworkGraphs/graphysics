@@ -1,6 +1,10 @@
 import {obj_has} from "../utils.js"
+import {html_tag} from "../../libs/web-js-utils.js"
 
 let g_debug = false
+let g_demo_step = 0
+let svg = null
+
 
 let min = Math.min
 let max = Math.max
@@ -159,17 +163,19 @@ function neighbors_walls_cost(sample,seeds,w,h,walls){
     return ((min_free_dist < 10)?10000:(100.0/min_free_dist))
 }
 
-function select_vertex_position(v,placed,width,height,debug=false){
+function select_vertex_position(v,placed,params){
     //console.time("select_pos")
-    g_debug = debug
+    g_debug = params.debug
+    g_demo_step = params.demo
+    svg = params.g.svg
     let best_index = -1
     let best_cost = Number.MAX_VALUE;
     let i_costs = []
-    const nb_samples = 500
-    let samples = samples_in_rect(nb_samples,width,height,v.viewBox.width,v.viewBox.height)
+    const nb_samples = 100
+    let samples = samples_in_rect(nb_samples,params.width,params.height,v.viewBox.width,v.viewBox.height)
     for(let i=0;i<nb_samples;i++){
         const s = samples[i]
-        const dist_cost = neighbors_walls_cost(s,placed,width,height,true)
+        const dist_cost = neighbors_walls_cost(s,placed,params.width,params.height,true)
         //assignment needed for intersection calculation of potential sample coordinates
         //v needs to be passed for neighbors information
         v.viewBox.x = s.x
@@ -177,21 +183,28 @@ function select_vertex_position(v,placed,width,height,debug=false){
         const i_cost = interset_cost(v,placed)
         i_costs.push(i_cost)
         const cost = dist_cost + i_cost
-        if(debug){
+        if(params.debug){
             console.log(`${i}) total:${cost.toFixed(2)} , dist_cost: ${dist_cost.toFixed(2)} , i_cost:${i_cost}`)
         }
         if(cost < best_cost){
             best_index = i
             best_cost = cost
         }
+        if(g_debug){
+            if(i_cost == 0){
+                s.svg = html_tag(svg,"circle",/*html*/`<circle cx=${s.x} cy=${s.y} r="3" stroke="black" stroke-width="3" fill="black" />`)
+            }else{
+                s.svg = html_tag(svg,"circle",/*html*/`<circle cx=${s.x} cy=${s.y} r="3" stroke="black" stroke-width="3" fill="red" />`)
+            }
+        }
     }
-    if(debug){
+    if(params.debug){
         console.log(`best_cost = ${best_cost.toFixed(2)} at best_index = ${best_index}`)
     }
     if(best_index == -1){
         console.warning("sampling failed")
-        let [x,y] = [   Math.round((Math.random()*width)),
-                        Math.round((Math.random()*height))
+        let [x,y] = [   Math.round((Math.random()*params.width)),
+                        Math.round((Math.random()*params.height))
                     ]
         return [x,y]
     }else{
@@ -207,6 +220,7 @@ function select_vertex_position(v,placed,width,height,debug=false){
         v.viewBox.x = best_sample.x
         v.viewBox.y = best_sample.y
         //console.timeEnd("select_pos")
+
         return [best_sample.x,best_sample.y]
     }
 

@@ -59,6 +59,7 @@ What is planned to be implemented in the Future
 * edges with polylines and arrows
 * multi-edges
 * graph direction placement left to right for edge labels read
+* collect muliple css rules in one litteral string
 
 
 # Development

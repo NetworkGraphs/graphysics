@@ -95,6 +95,7 @@ class Render{
     create(parent_div,sheet){
         let [w,h] = [parent_div.offsetWidth,parent_div.offsetHeight]
         svg = html(parent_div,/*html*/`<svg id="main_svg" xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"></svg>`);
+        g.svg = svg//shared for debug purpose only
         utl.set_parent(svg)
         this.draw()
         const select_color    = "hsl(140, 80%, 50%)"

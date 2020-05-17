@@ -66,7 +66,7 @@ class Layout{
         remove_add_pinned(g,central_order,already_placed)
         
         central_order.forEach((v)=>{
-            [v.viewBox.x,v.viewBox.y] = select_vertex_position(v,already_placed,params.width,params.height)//for debug : ,(v.id==6)
+            [v.viewBox.x,v.viewBox.y] = select_vertex_position(v,already_placed,{g:g,width:params.width,height:params.height,demo:100,debug:false})//for debug : (v.id==6),
             already_placed.push(v)
         })
     }
@@ -77,7 +77,7 @@ class Layout{
         remove_add_pinned(g,neighbors_order,already_placed)
         
         neighbors_order.forEach((v)=>{
-            [v.viewBox.x,v.viewBox.y] = select_vertex_position(v,already_placed,params.width,params.height)//for debug : ,(v.id==6)
+            [v.viewBox.x,v.viewBox.y] = select_vertex_position(v,already_placed,{g:g,width:params.width,height:params.height,debug:false})//for debug : ,(v.id==6)
             already_placed.push(v)
         })
     }
