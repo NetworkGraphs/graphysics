@@ -1,5 +1,5 @@
-import { defined } from "../libs/web-js-utils.js";
-import {select_vertex_position} from "./layout/sampling.js"
+import { defined, clear } from "../libs/web-js-utils.js";
+import {select_vertex_position,clear_demo,start_demo} from "./layout/sampling.js"
 
 function degree_centrality(vertices){
     let central = []
@@ -59,27 +59,83 @@ function remove_add_pinned(g,vertices,already_placed){
     }
 }
 
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function list_visibility(svg_list,visible){
+    svg_list.forEach((s)=>{
+        s.svg.group.setAttribute("visibility",visible?"visible":"hidden")
+    })
+}
+
+function edges_visibility(v,visible){
+    for(let [eid,e] of Object.entries(v.edges)){
+        e.svg.group.setAttribute("visibility",visible?"visible":"hidden")
+    }
+}
+function show_edges_if(v){
+    for(let [eid,e] of Object.entries(v.edges)){
+        if((e.inV.svg.group.getAttribute("visibility") == "visible")&&
+           (e.outV.svg.group.getAttribute("visibility") == "visible")){
+            e.svg.group.setAttribute("visibility","visible")
+        }
+    }
+}
+
 class Layout{
-    centrals_first(g,params){
+    async centrals_first(g,params){
         let central_order = degree_centrality(g.vertices)
         let already_placed = []
         remove_add_pinned(g,central_order,already_placed)
         
-        central_order.forEach((v)=>{
-            [v.viewBox.x,v.viewBox.y] = select_vertex_position(v,already_placed,{g:g,width:params.width,height:params.height,demo:100,debug:false})//for debug : (v.id==6),
+        for(let i=0;i<central_order.length;i++){
+            let v = central_order[i]
+            let demo = defined(params.demo)?params.demo:0
+            let[x,y] = select_vertex_position(v,already_placed,{g:g,width:params.width,height:params.height,demo:demo,debug:false})//for debug : (v.id==6),
+            v.viewBox.x = x
+            v.viewBox.y = y
+            v.viewBox.placed = true
+            if(demo!=0){
+                await delay(demo)
+            }
             already_placed.push(v)
-        })
+        }
     }
-    propagate_neighbors(g,params){
+    async propagate_neighbors(g,params){
         let neighbors_order = neighbors_centrality(g.vertices,params.v)
         //neighbors_order.forEach((n)=>{console.log(n.label)})
         let already_placed = []
         remove_add_pinned(g,neighbors_order,already_placed)
+        list_visibility(already_placed,true)
+        list_visibility(neighbors_order,false)
+        edges_visibility(g,false)
         
-        neighbors_order.forEach((v)=>{
-            [v.viewBox.x,v.viewBox.y] = select_vertex_position(v,already_placed,{g:g,width:params.width,height:params.height,debug:false})//for debug : ,(v.id==6)
+        for(let i=0;i<neighbors_order.length;i++){
+            start_demo(g.svg,"g_svg_prop")
+            let v = neighbors_order[i]
+            let demo = defined(params.demo)?params.demo:0
+            let [x,y] = select_vertex_position(v,already_placed,{
+                g:g,
+                width:params.width,
+                height:params.height,
+                demo:demo,
+                debug:false
+            })//for debug : ,(v.id==6)
+            v.viewBox.x = x
+            v.viewBox.y = y
+            v.viewBox.placed |= true
+            v.svg.group.setAttribute("visibility","visible")
+            show_edges_if(v)
             already_placed.push(v)
-        })
+            console.log(`selected pos ${v.label}`)
+            if(demo!=0){
+                await delay(demo)
+            }
+            clear_demo()
+        }
+        edges_visibility(g,true)
+
     }
 }
 

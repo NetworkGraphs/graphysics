@@ -1,10 +1,10 @@
 import {obj_has} from "../utils.js"
-import {html_tag} from "../../libs/web-js-utils.js"
+import {html,html_tag} from "../../libs/web-js-utils.js"
 
 let g_debug = false
 let g_demo_step = 0
 let svg = null
-
+let demo_svgs = []
 
 let min = Math.min
 let max = Math.max
@@ -163,6 +163,25 @@ function neighbors_walls_cost(sample,seeds,w,h,walls){
     return ((min_free_dist < 10)?10000:(100.0/min_free_dist))
 }
 
+function plot_iteration(samples,best_index,i_costs){
+
+    for(let i=0;i<samples.length;i++){
+        const s = samples[i]
+        if(i_costs[i] == 0){
+            html_tag(demo_svgs,"circle",/*html*/`<circle cx=${s.x} cy=${s.y} r="5" stroke="black" stroke-width="0" fill="black" />`)
+        }else{
+            html_tag(demo_svgs,"circle",/*html*/`<circle cx=${s.x} cy=${s.y} r="5" stroke="black" stroke-width="0" fill="red" />`)
+        }
+    }
+    let best_sample = samples[best_index]
+    let [bx,by] = [best_sample.x,best_sample.y]
+    if(i_costs[best_index] != 0){
+        html_tag(demo_svgs,"circle",/*html*/`<circle cx=${bx} cy=${by} r="10" stroke="black" stroke-width="2" fill="red" />`)
+    }else{
+        html_tag(demo_svgs,"circle",/*html*/`<circle cx=${bx} cy=${by} r="10" stroke="black" stroke-width="2" fill="green" />`)
+    }
+}
+
 function select_vertex_position(v,placed,params){
     //console.time("select_pos")
     g_debug = params.debug
@@ -190,13 +209,6 @@ function select_vertex_position(v,placed,params){
             best_index = i
             best_cost = cost
         }
-        if(g_debug){
-            if(i_cost == 0){
-                s.svg = html_tag(svg,"circle",/*html*/`<circle cx=${s.x} cy=${s.y} r="3" stroke="black" stroke-width="3" fill="black" />`)
-            }else{
-                s.svg = html_tag(svg,"circle",/*html*/`<circle cx=${s.x} cy=${s.y} r="3" stroke="black" stroke-width="3" fill="red" />`)
-            }
-        }
     }
     if(params.debug){
         console.log(`best_cost = ${best_cost.toFixed(2)} at best_index = ${best_index}`)
@@ -208,22 +220,28 @@ function select_vertex_position(v,placed,params){
                     ]
         return [x,y]
     }else{
-        //console.log(`best_index for  ${v.label} : ${best_index}`)
-        //let msg = "placed : "
-        //placed.forEach((p)=>{msg += `${p.label} `})
-        //console.log(msg)
-        //console.log(i_costs)
-        if(i_costs[best_index] != 0){
-            console.log(`i_cost failed for ${v.label}`)
-        }
         let best_sample = samples[best_index]
         v.viewBox.x = best_sample.x
         v.viewBox.y = best_sample.y
+        if(i_costs[best_index] != 0){
+            console.log(`i_cost failed for ${v.label}`)
+        }
         //console.timeEnd("select_pos")
+        if(g_demo_step!=0){
+            plot_iteration(samples,best_index,i_costs)
+        }
 
         return [best_sample.x,best_sample.y]
     }
 
 }
 
-export {select_vertex_position};
+function start_demo(svg,id){
+    demo_svgs = html(svg,/*html*/`<g id="${id}"/>`)
+}
+
+function clear_demo(){
+    demo_svgs.parentElement.removeChild(demo_svgs)
+}
+
+export {select_vertex_position,start_demo,clear_demo};

@@ -92,12 +92,12 @@ class Render{
         window.addEventListener( 'menu_action', onMenuAction, false );
     }
 
-    create(parent_div,sheet){
+    create_svg(parent_div,cfg){
+        config = cfg
         let [w,h] = [parent_div.offsetWidth,parent_div.offsetHeight]
         svg = html(parent_div,/*html*/`<svg id="main_svg" xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"></svg>`);
         g.svg = svg//shared for debug purpose only
         utl.set_parent(svg)
-        this.draw()
         const select_color    = "hsl(140, 80%, 50%)"
         const default_color   = "hsl(140, 80%, 90%)"
         const darken_color    = "hsl(140, 80%, 33%)"
@@ -144,12 +144,10 @@ class Render{
             stroke: ${default_color}
         }`);
         document.adoptedStyleSheets = [...document.adoptedStyleSheets, this.sheet];
-
     }
     
 
-    setViewBoxes(cfg){
-        config = cfg
+    fitLabels(){
         let check_canvas = document.createElement("canvas")
         let ctx = check_canvas.getContext("2d")
         ctx.font = `${config.render.font_height_px}px ${config.render.font}`
@@ -167,7 +165,7 @@ class Render{
         }
     }
 
-    draw(){
+    create_graph(){
         clear(svg)
         utl.filter_light(       svg,{id:"f_pinned",            lx:-20,ly:-10,lz:10})
         utl.filter_light_shadow(svg,{id:"f_default",            lx:-20,ly:-10,lz:10,dx:5,dy:2})

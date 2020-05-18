@@ -1,5 +1,4 @@
 import { defined } from "../libs/web-js-utils.js";
-import { Layout } from "./layout.js";
 
 let g = null;
 let engine = null;
@@ -8,7 +7,6 @@ let last_run = 0;
 let last_delta = 0;
 let drag = {}
 let to_run_layout = false
-let layout = new Layout()
 
 function get_delta_correction(){
     let delta = 1000/60;            //used as default for first interations only
@@ -65,35 +63,6 @@ function onVertexDrag(e){
     }
 }
 
-function onMenuAction(e){
-    console.log(`${e.detail.v.label} => ${e.detail.action}:${e.detail.type}`)
-    if(e.detail.action == "layout"){
-        e.detail.v.pinned = true
-        e.detail.v.svg.shape.classList.add("pinned")
-        layout.propagate_neighbors(g,{width:width,height:height,v:e.detail.v})
-        place_bodies()
-    }
-}
-
-function create_bodies(){
-    for(let [vid,v] of Object.entries(g.vertices)){
-        v.body = Matter.Bodies.rectangle(v.viewBox.x,v.viewBox.y,v.viewBox.width,v.viewBox.height,
-            {id:v.id,label:v.label,mass:5,frictionAir:0.3}
-            )
-        Matter.World.addBody(engine.world,v.body)
-        v.viewBox.moved = true
-    }
-}
-
-function place_bodies(){
-    for(let [vid,v] of Object.entries(g.vertices)){
-        if(!defined(v.pinned) || !v.pinned){
-            Matter.Body.setPosition(v.body,Matter.Vector.create(v.viewBox.x,v.viewBox.y))
-            v.viewBox.moved |= true
-        }
-    }
-}
-
 class Physics{
     constructor(graph_data){
         g = graph_data
@@ -101,20 +70,37 @@ class Physics{
         engine.world.gravity.y = 0.0
 
         window.addEventListener( 'vertex_drag', onVertexDrag, false );
-        window.addEventListener( 'menu_action', onMenuAction, false );
     }
 
-    create(parent_div){
+    create_bodies(parent_div){
         width = parent_div.offsetWidth
         height = parent_div.offsetHeight
-        layout.centrals_first(g,{width:width,height:height})
-        create_bodies()
+        for(let [vid,v] of Object.entries(g.vertices)){
+            v.body = Matter.Bodies.rectangle(v.viewBox.x,v.viewBox.y,v.viewBox.width,v.viewBox.height,
+                {id:v.id,label:v.label,mass:5,frictionAir:0.3}
+                )
+            Matter.World.addBody(engine.world,v.body)
+            v.viewBox.placed = false//allows to override physics
+            v.viewBox.moved = true
+        }
     }
 
+    place_body(v){
+        if(!defined(v.pinned) || !v.pinned){
+            Matter.Body.setPosition(v.body,Matter.Vector.create(v.viewBox.x,v.viewBox.y))
+            v.viewBox.moved |= true
+        }
+    }
+    
     run(){
         const{delta,correction} = get_delta_correction();
         Matter.Engine.update(engine,delta,correction);
         for(let [vid,v] of Object.entries(g.vertices)){
+            if(v.viewBox.placed){
+                this.place_body(v)
+                v.viewBox.placed = false
+                v.viewBox.moved |= true
+            }
             v.viewBox.x = v.body.position.x
             v.viewBox.y = v.body.position.y
             v.viewBox.angle = 180*v.body.angle / Math.PI
