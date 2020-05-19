@@ -74,6 +74,13 @@ function edges_visibility(v,visible){
         e.svg.group.setAttribute("visibility",visible?"visible":"hidden")
     }
 }
+function edges_placed_visible(g,already_placed){
+    for(let [eid,e] of Object.entries(g.edges)){
+        if(already_placed.includes(e.inV) && already_placed.includes(e.outV)){
+            e.svg.group.setAttribute("visibility","visible")
+        }
+    }
+}
 function show_edges_if(v){
     for(let [eid,e] of Object.entries(v.edges)){
         if((e.inV.svg.group.getAttribute("visibility") == "visible")&&
@@ -110,6 +117,7 @@ class Layout{
         list_visibility(already_placed,true)
         list_visibility(neighbors_order,false)
         edges_visibility(g,false)
+        edges_placed_visible(g,already_placed)
         
         for(let i=0;i<neighbors_order.length;i++){
             start_demo(g.svg,"g_svg_prop")

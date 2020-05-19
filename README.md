@@ -10,6 +10,7 @@ What is already available
   * stochastic cost driven centrality placement
   * Nodes physical collisions, no overlap
   * Neighborhood interaction forces
+  * step by step demo layout with colred cost samples
 * SVG
   * shadows and light filters
   * inline html and css with classes
@@ -54,8 +55,9 @@ What is planned to be implemented in the Future
   * Acceleration (wasm)
 
 ## Plan Details
+* cost of distance to edges
+* horizontality force
 * configure sampling number
-* notify edges crossing cost failure
 * edges with polylines and arrows
 * multi-edges
 * graph direction placement left to right for edge labels read
