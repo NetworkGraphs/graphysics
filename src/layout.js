@@ -63,6 +63,12 @@ function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function readKey() {
+    return new Promise(resolve => {
+        window.addEventListener('keypress', resolve, {once:true});
+    });
+}
+
 function list_visibility(svg_list,visible){
     svg_list.forEach((s)=>{
         s.svg.group.setAttribute("visibility",visible?"visible":"hidden")
@@ -138,7 +144,8 @@ class Layout{
             already_placed.push(v)
             console.log(`selected pos ${v.label}`)
             if(demo!=0){
-                await delay(demo)
+                //await delay(demo)
+                await readKey()
             }
             clear_demo()
         }

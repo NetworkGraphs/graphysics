@@ -132,6 +132,10 @@ class Render{
             font: ${config.render.font_height_px}px ${config.render.font}
         }`);
         this.sheet.insertRule(/*css*/`
+        .d_text {
+            font: ${config.render.font_height_px}px ${config.render.font}
+        }`);
+        this.sheet.insertRule(/*css*/`
         .e_text {
             font: ${config.render.font_height_px}px ${config.render.font}
         }`);

@@ -1,6 +1,8 @@
 import {obj_has} from "../utils.js"
 import {html,html_tag} from "../../libs/web-js-utils.js"
 
+let Vector = Matter.Vector
+
 let g_debug = false
 let g_demo_step = 0
 let svg = null
@@ -8,6 +10,10 @@ let demo_svgs = []
 
 let min = Math.min
 let max = Math.max
+
+function center(va,vb){
+    return ({x:(va.x+vb.x)/2,y:(va.y+vb.y)/2})
+}
 
 /**
  * returns true if edges segments intersect each other (not the full lines scope)
@@ -93,6 +99,12 @@ function distance(va,vb){
     return Math.sqrt(dx * dx + dy * dy)
 }
 
+function dist_sqr(va,vb){
+    const dx = va.x-vb.x
+    const dy = va.y-vb.y
+    return (dx * dx + dy * dy)
+}
+
 function walls_distance(point,w,h){
     let walls_dist = []
     walls_dist.push(Math.abs(point.x))
@@ -100,6 +112,53 @@ function walls_distance(point,w,h){
     walls_dist.push(Math.abs(w-point.x))
     walls_dist.push(Math.abs(h-point.y))
     return Math.min(...walls_dist)
+}
+
+function draw_edge_distance(p,projection,d,color,text){
+    html_tag(demo_svgs,"path",/*html*/`<path d="M ${p.x} ${p.y} L ${projection.x} ${projection.y}" stroke="${color}" stroke-width="1" />`)
+    let c = center(p,projection)
+    html(demo_svgs,/*html*/`<text x="${c.x}" y="${c.y}" class="d_text" dominant-baseline="middle" text-anchor="middle" style="pointer-events:none">${d.toFixed(2)}</text>`)
+}
+
+function edge_distance(point,edge){
+    const debug = false
+    const epsilon = 1//unit is pixels therefore 1 is already too small
+    const p = {x:point.viewBox.x,y:point.viewBox.y}
+    const e1 = {x:edge.inV.viewBox.x,y:edge.inV.viewBox.y}
+    const e2 = {x:edge.outV.viewBox.x,y:edge.outV.viewBox.y}
+
+    //if(g_demo_step!=0){html_tag(demo_svgs,"circle",/*html*/`<circle cx=${e1.x} cy=${e1.y} r="5" stroke="black" stroke-width="0" fill="green" />`)}
+    //if(g_demo_step!=0){html_tag(demo_svgs,"circle",/*html*/`<circle cx=${e2.x} cy=${e2.y} r="5" stroke="black" stroke-width="0" fill="green" />`)}
+    //if(g_demo_step!=0){html_tag(demo_svgs,"circle",/*html*/`<circle cx=${p.x} cy=${p.y} r="5" stroke="black" stroke-width="0" fill="blue" />`)}    
+    const length = dist_sqr(e1,e2)
+    if(length < epsilon){
+        return [distance(p,e1),false]
+    }
+    let t = ((p.x - e1.x) * (e2.x - e1.x) + (p.y - e1.y) * (e2.y - e1.y)) / length;
+    t = Math.max(0, Math.min(1, t));
+    const projection = {    x: e1.x + t * (e2.x - e1.x),
+                            y: e1.y + t * (e2.y - e1.y) }
+    //check if projection is outside the edge segment
+    const e1_p = Vector.sub(p,e1)
+    const p_e2 = Vector.sub(e2,p)
+    const e1_e2 = Vector.sub(e2,e1)
+    if(Vector.dot(e1_p,e1_e2) < 0){//point beyond e1
+        const d = distance(p,e1)
+        if((g_demo_step!=0)&&debug)draw_edge_distance(p,projection,d,"red",`${point.label} outside (${edge.inV.label} , ${edge.outV.label})`)
+        if(debug)console.log(`   ed:outside ${point.label} / (${edge.inV.label} , ${edge.outV.label}) => dist=${d}`)
+        return [d,false]
+    }else if(Vector.dot(e1_e2,p_e2) < 0){//point beyond e2
+        const d = distance(p,e2)
+        if((g_demo_step!=0)&&debug)draw_edge_distance(p,projection,d,"red",`${point.label} outside (${edge.inV.label} , ${edge.outV.label})`)
+        if(debug)console.log(`   ed:outside ${point.label} / (${edge.inV.label} , ${edge.outV.label}) => dist=${d}`)
+        return [d,false]
+    }else{
+        //if(g_demo_step!=0){html_tag(demo_svgs,"circle",/*html*/`<circle cx=${projection.x} cy=${projection.y} r="5" stroke="black" stroke-width="3" fill="green" />`)}
+        const d = distance(p,projection)
+        if((g_demo_step!=0)&&debug)draw_edge_distance(p,projection,d,"green",`${point.label} in (${edge.inV.label} , ${edge.outV.label})`)
+        if(debug)console.log(`   ed:inside ${point.label} / (${edge.inV.label} , ${edge.outV.label}) => dist=${d}`)
+        return [d,true]
+    }
 }
 
 function get_placed_others_edges(sample,placed_vertices){
@@ -144,19 +203,20 @@ function copy_without_neighbors(sample,placed_vertices){
 function common_vertex(e1,e2){
     return ((e1.inV.id == e2.inV.id) || (e1.inV.id == e2.outV.id) || (e1.outV.id == e2.inV.id) || (e1.outV.id == e2.outV.id))
 }
+function own_edge(vertex,edge){
+    return ((edge.inV.id == vertex.id) || (edge.outV.id == vertex.id))
+}
 
-function interset_cost(sample,placed_vertices,others_edges_){
-    const others_edges = get_placed_others_edges(sample,placed_vertices)//not including own, computed once for all samples
-    const own_tobe_placed_edges = get_own_tobe_placed_edges(sample,placed_vertices)
+function interset_cost(sample,placed_vertices,others_edges,own_tobe_placed_edges){
     //if(g_demo_step!=0){
     //    others_edges.forEach((e)=>{
     //        console.log(`  other's edge : ${e.inV.label} ${e.outV.label}`)
-    //        html_tag(demo_svgs,"path",/*html*/`<path d="M ${e.inV.viewBox.x} ${e.inV.viewBox.y} L ${e.outV.viewBox.x} ${e.outV.viewBox.y}" stroke-width="3" stroke-color="black" />`)
+    //        html_tag(demo_svgs,"path",/*html*/`<path class="else" d="M ${e.inV.viewBox.x} ${e.inV.viewBox.y} L ${e.outV.viewBox.x} ${e.outV.viewBox.y}" stroke-width="10" stroke-color="black" />`)
     //    })
     //    console.log(`   placing : ${sample.label}`)
     //    own_tobe_placed_edges.forEach((e)=>{
     //        console.log(`  own edge : ${e.inV.label} ${e.outV.label}`)
-    //        html_tag(demo_svgs,"path",/*html*/`<path d="M ${e.inV.viewBox.x} ${e.inV.viewBox.y} L ${e.outV.viewBox.x} ${e.outV.viewBox.y}" stroke-width="10" />`)
+    //        html_tag(demo_svgs,"path",/*html*/`<path class="else" d="M ${e.inV.viewBox.x} ${e.inV.viewBox.y} L ${e.outV.viewBox.x} ${e.outV.viewBox.y}" stroke-width="10"  stroke-color="black" />`)
     //    })
     //}
     for(let [oeid,own_e] of Object.entries(own_tobe_placed_edges)){
@@ -173,7 +233,7 @@ function interset_cost(sample,placed_vertices,others_edges_){
     return 0
 }
 
-function neighbors_edges_walls_cost(vertex,seeds,w,h){
+function neighbors_walls_cost(vertex,seeds,w,h){
     let sample = {x:vertex.viewBox.x,y:vertex.viewBox.y}
     let free_dist = []
     for(let j= 0;j<seeds.length;j++){
@@ -181,7 +241,38 @@ function neighbors_edges_walls_cost(vertex,seeds,w,h){
     }
     free_dist.push(walls_distance(sample,w,h))
     const min_free_dist = Math.min(...free_dist)//the minimal distance is taken to reject the sample
-    return ((min_free_dist < 10)?10000:(100.0/min_free_dist))
+    return ((min_free_dist < 10)?10:(100.0/min_free_dist))
+}
+
+function distance_to_edges_cost(vertex,placed,others_edges,own_tobe_placed_edges){
+    let free_dist = []
+    //console.log(`   checking other's edges ${vertex.label}`)
+    others_edges.forEach((e)=>{
+        if(!own_edge(vertex,e)){
+            const [dist,inside] = edge_distance(vertex,e)
+            free_dist.push(dist)
+        }
+    })
+    //console.log(`   checking own edges ${vertex.label}`)
+    own_tobe_placed_edges.forEach((e)=>{
+        placed.forEach((vertex)=>{
+            if(!own_edge(vertex,e)){
+                const [dist,inside] = edge_distance(vertex,e)
+                if(inside){
+                    free_dist.push(dist)
+                }
+            }
+        })
+    })
+    //free_dist.push(walls_distance(sample,w,h))
+    if(free_dist.length == 0){
+        return 0//no edges, no cost
+    }else{
+        const min_free_dist = Math.min(...free_dist)//the minimal distance is taken to reject the sample
+        const cost = ((min_free_dist < 10)?10:(100.0/min_free_dist))
+        //console.log(`   min dist ${vertex.label} (${vertex.viewBox.x},${vertex.viewBox.y}) is ${min_free_dist.toFixed(1)} costs: ${cost.toFixed(2)}`)
+        return cost
+    }
 }
 
 function plot_iteration(samples,best_index,costs){
@@ -194,7 +285,7 @@ function plot_iteration(samples,best_index,costs){
     let best_sample = samples[best_index]
     const s_h_col = 200 + 160 * costs[best_index]/ color_margin
     let [bx,by] = [best_sample.x,best_sample.y]
-    html_tag(demo_svgs,"circle",/*html*/`<circle cx=${bx} cy=${by} r="10" stroke="black" stroke-width="2" fill="hsl(${s_h_col},82%,56%)" />`)
+    html_tag(demo_svgs,"circle",/*html*/`<circle cx=${bx} cy=${by} r="25" stroke="hsl(${s_h_col},82%,56%)" stroke-width="3" fill="rgba(0,0,0,0)" />`)
 }
 
 function select_vertex_position(v,placed,params){
@@ -206,22 +297,25 @@ function select_vertex_position(v,placed,params){
     let best_cost = Number.MAX_VALUE;
     let costs = []
     const others_edges = get_placed_others_edges(v,placed)//not including own, computed once for all samples
-    const nb_samples = 100
+    const nb_samples = 1000
     let samples = samples_in_rect(nb_samples,params.width,params.height,v.viewBox.width,v.viewBox.height)
+
     for(let i=0;i<nb_samples;i++){
         v.viewBox.x = samples[i].x//needed for neighbors info
         v.viewBox.y = samples[i].y
-        const dist_cost = neighbors_edges_walls_cost(v,placed,params.width,params.height,true)
-        const i_cost = interset_cost(v,placed,others_edges)
-        const cost = dist_cost + i_cost
+        const own_tobe_placed_edges = get_own_tobe_placed_edges(v,placed)
+        const dist_cost = neighbors_walls_cost(v,placed,params.width,params.height,true)
+        const i_cost = interset_cost(v,placed,others_edges,own_tobe_placed_edges)
+        const e_cost = distance_to_edges_cost(v,placed,others_edges,own_tobe_placed_edges)
+        const cost = dist_cost + i_cost + e_cost
         costs.push(cost)
         if(cost < best_cost){
             best_index = i
             best_cost = cost
         }
-        if(params.debug){console.log(`${i}) total:${cost.toFixed(2)} , dist_cost: ${dist_cost.toFixed(2)} , i_cost:${i_cost}`)}
+        if(params.debug){console.log(`${i}) total:${cost.toFixed(2)} , dist_cost: ${dist_cost.toFixed(2)} , i_cost:${i_cost.toFixed(2)} , e_cost:${e_cost.toFixed(2)}`)}
     }
-    if(params.debug){console.log(`best_cost = ${best_cost.toFixed(2)} at best_index = ${best_index}`)}
+    if(params.debug){console.log(`best_cost for ${v.label} = ${best_cost.toFixed(2)} at best_index = ${best_index}`)}
     if(best_index == -1){
         console.warn("sampling failed")
         let [x,y] = [   Math.round((Math.random()*params.width)),
@@ -232,6 +326,7 @@ function select_vertex_position(v,placed,params){
         let best_sample = samples[best_index]
         v.viewBox.x = best_sample.x
         v.viewBox.y = best_sample.y
+        console.log(`    selected cost for ${v.label} (${v.viewBox.x},${v.viewBox.y}) : ${costs[best_index]}`)
         //console.timeEnd("select_pos")
         if(g_demo_step!=0){
             plot_iteration(samples,best_index,costs)
