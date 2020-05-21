@@ -8,7 +8,7 @@ let svg = null;
 let menu_svg = null;
 let buttons = {};
 let texts = {};
-let vertex = null;
+let params = null
 
 let state = {active:false}
 let sheet = null
@@ -30,7 +30,7 @@ function remove(){
         svg.removeChild(menu_svg)
         console.log("menu over")
         state.active = false
-        event("vertex_menu",{type:"end"})
+        event("context_menu",{menu:params.menu,type:"end"})
         remove_sheet(sheet)
         //can't remove sheet : document.adoptedStyleSheets.splice(document.adoptedStyleSheets.indexOf(sheet))
     }
@@ -54,11 +54,11 @@ function onContext(e){
 
 class Menu{
     call(Params){
+        params = Params
         const circle_radius = 80
         const pie_radius_start = 20
         const pie_radius_end = 90
 
-        vertex = Params.v
         svg = Params.svg
         let [x,y] = [Params.x,Params.y]
         menu_svg = html(svg,/*html*/`<g id="g_menu"/>`)

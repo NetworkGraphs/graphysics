@@ -11,7 +11,8 @@ let config = null;
 let menu_v = null;
 let attraction = false;
 
-function onMenuAction(e){
+
+function onVertexMenuAction(e){
     if(e.detail.action == "pin"){
         e.detail.v.pinned = true
         e.detail.v.svg.shape.classList.add("pinned")
@@ -23,30 +24,56 @@ function onMenuAction(e){
     }
 }
 
-function onVertexMenu(e){
+function onMenuAction(e){
+    if(e.detail.menu=="Vertex"){
+        onVertexMenuAction(e)
+    }else if(e.detail.menu=="Global"){
+        //no render actions
+    }
+}
+
+function onVertexContextMenu(e){
     if(e.detail.type == "start"){
         menu_v = g.vertices[e.detail.id]
         let vb = menu_v.viewBox
         let pin_name = menu_v.pinned?"unpin":"pin"
-        let buttons = menu.call({svg:svg,x:vb.x,y:vb.y,actions:["attract","layout",pin_name]})
-        buttons[pin_name].addEventListener(    'click', (e)=>{send("menu_action",{type:"click",action:e.target.getAttribute("data-name"),v:menu_v} )}, false );
-        buttons["layout"].addEventListener( 'click', (e)=>{send("menu_action",{type:"click",action:e.target.getAttribute("data-name"),v:menu_v} )}, false );
+        let buttons = menu.call({svg:svg,menu:"Vertex",x:vb.x,y:vb.y,actions:["attract","layout",pin_name]})
+        buttons[pin_name].addEventListener(    'click', (e)=>{send("menu_action",{menu:"Vertex",type:"click",action:e.target.getAttribute("data-name"),v:menu_v} )}, false );
+        buttons["layout"].addEventListener( 'click', (e)=>{send("menu_action",{menu:"Vertex",type:"click",action:e.target.getAttribute("data-name"),v:menu_v} )}, false );
         buttons["attract"].addEventListener('mousedown', (e)=>{
-            send("menu_action",{type:"start",action:e.target.getAttribute("data-name"),v:menu_v} )
+            send("menu_action",{menu:"Vertex",type:"start",action:e.target.getAttribute("data-name"),v:menu_v} )
             attraction = true
         }, false );
         buttons["attract"].addEventListener('mouseup', (e)=>{
-            send("menu_action",{type:"end",action:e.target.getAttribute("data-name"),v:menu_v} )
+            send("menu_action",{menu:"Vertex",type:"end",action:e.target.getAttribute("data-name"),v:menu_v} )
             attraction = false
         }, false );
         buttons["attract"].addEventListener('mouseleave', (e)=>{
-            send("menu_action",{type:"end",action:e.target.getAttribute("data-name"),v:menu_v} )
+            send("menu_action",{menu:"Vertex",type:"end",action:e.target.getAttribute("data-name"),v:menu_v} )
             attraction = false
         }, false );
     }else if(e.detail.type == "end"){
         if(attraction){
-            send("menu_action",{type:"end",action:"attract",v:menu_v} )
+            send("menu_action",{menu:"Vertex",type:"end",action:"attract",v:menu_v} )
         }
+    }
+}
+
+function onGlobalContextMenu(e){
+    if(e.detail.type == "start"){
+        let [x,y] = [e.detail.x,e.detail.y]
+        let buttons = menu.call({svg:svg,menu:"Global",x:x,y:y,actions:["demo","layout"]})
+        let menuClick = (e)=>{send("menu_action",{menu:"Global",type:"click",action:e.target.getAttribute("data-name")} )}
+        buttons["layout"].addEventListener( 'click', menuClick, false );
+        buttons["demo"].addEventListener( 'click', menuClick, false );
+    }
+}
+
+function onContextMenu(e){
+    if(e.detail.menu=="Vertex"){
+        onVertexContextMenu(e)
+    }else if(e.detail.menu=="Global"){
+        onGlobalContextMenu(e)
     }
 }
 
@@ -88,7 +115,7 @@ class Render{
         g = graph_data
         window.addEventListener( 'vertex_hover', onVertexHover, false );
         window.addEventListener( 'vertex_drag', onVertexDrag, false );
-        window.addEventListener( 'vertex_menu', onVertexMenu, false );
+        window.addEventListener( 'context_menu', onContextMenu, false );
         window.addEventListener( 'menu_action', onMenuAction, false );
     }
 

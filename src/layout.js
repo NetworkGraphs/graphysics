@@ -66,6 +66,7 @@ function delay(ms) {
 function readKey() {
     return new Promise(resolve => {
         window.addEventListener('keypress', resolve, {once:true});
+        window.addEventListener('mousedown',  resolve, {once:true} );
     });
 }
 
@@ -101,8 +102,15 @@ class Layout{
         let central_order = degree_centrality(g.vertices)
         let already_placed = []
         remove_add_pinned(g,central_order,already_placed)
-        
+
+        let demo = defined(params.demo)?params.demo:0
+        if(demo!=0){
+            list_visibility(central_order,false)
+            edges_visibility(g,false)
+        }
+
         for(let i=0;i<central_order.length;i++){
+            start_demo(g.svg,"g_svg_prop")
             let v = central_order[i]
             let demo = defined(params.demo)?params.demo:0
             let[x,y] = select_vertex_position(v,already_placed,{g:g,width:params.width,height:params.height,demo:demo,debug:false})//for debug : (v.id==6),
@@ -110,11 +118,16 @@ class Layout{
             v.viewBox.y = y
             v.viewBox.placed = true
             if(demo!=0){
-                await delay(demo)
+                v.svg.group.setAttribute("visibility","visible")
+                show_edges_if(v)
+                await readKey()
             }
             already_placed.push(v)
+            clear_demo()
         }
+        //no disconnected edges handling required in centrality layout
     }
+
     async propagate_neighbors(g,params){
         let neighbors_order = neighbors_centrality(g.vertices,params.v)
         //neighbors_order.forEach((n)=>{console.log(n.label)})

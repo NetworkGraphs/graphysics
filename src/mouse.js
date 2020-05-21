@@ -11,9 +11,10 @@ function onContext(e){
 function onMousePan(e){
     const is_vertex = e.target.classList.contains("vertex")
     let pointe_1 = defined(e.buttons)?(e.buttons == 1):(e.touches.length == 1)
-    let pointe_2 = defined(e.buttons)?(e.buttons == 2):(e.touches.length == 2)
-    let pointer_x = defined(e.offsetX)?e.offsetX:   ((e.touches.length>0)?(e.touches[0].pageX):state.offset.x)
-    let pointer_y = defined(e.offsetY)?e.offsetY:   ((e.touches.length>0)?(e.touches[0].pageY):state.offset.y)
+    let pointer_2 = defined(e.buttons)?(e.buttons == 2):(e.touches.length == 2)
+    let t_id = pointer_2?1:0
+    let pointer_x = defined(e.offsetX)?e.offsetX:   ((e.touches.length>0)?(e.touches[t_id].pageX):state.offset.x)
+    let pointer_y = defined(e.offsetY)?e.offsetY:   ((e.touches.length>0)?(e.touches[t_id].pageY):state.offset.y)
     let vdx = pointer_x - state.offset.x;
     let vdy = pointer_y - state.offset.y;
     //console.log(`tx:${vdx},ty:${vdy}    px:${e.touches[0].PageX},py:${e.touches[0].PageY}`)
@@ -45,7 +46,7 @@ function onMousePan(e){
             //console.log(`tx:${vdx},ty:${vdy}`)
             event("vertex_drag",{type:"move",tx:vdx,ty:vdy})
         }
-        if(!is_vertex && !pointe_1 && pointe_2 && !state.menu){
+        if(!is_vertex && !pointe_1 && pointer_2 && !state.menu){
             if(state.over_vertex){
                 state.over_vertex = false
                 event("vertex_hover",{type:"exit",id:state.id})
@@ -56,10 +57,13 @@ function onMousePan(e){
             state.dragging = true
             state.id = e.target.id
             event("vertex_drag",{type:"start",id:state.id})
-        }else if(pointe_2 && is_vertex){
+        }else if(pointer_2 && is_vertex){
             state.menu = true
             state.id = e.target.id
-            event("vertex_menu",{type:"start",id:state.id})
+            event("context_menu",{menu:"Vertex",type:"start",id:state.id,x:pointer_x,y:pointer_y})
+        }else if(pointer_2){
+            state.menu = true
+            event("context_menu",{menu:"Global",type:"start",x:pointer_x,y:pointer_y})
         }
     }else if(["mouseup","touchend"].includes(e.type)){
         if(state.dragging){
@@ -92,7 +96,7 @@ class Mouse{
         element.addEventListener( 'mouseup',    onMousePan, false );
         element.addEventListener( 'mousemove',  onMousePan, false );
         element.addEventListener( 'contextmenu',onContext, false );
-        window.addEventListener( 'vertex_menu', onVertexMenu, false );
+        window.addEventListener( 'context_menu', onVertexMenu, false );
     
     }
     

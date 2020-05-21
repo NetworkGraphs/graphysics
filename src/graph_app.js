@@ -13,7 +13,7 @@ let mouse   = null
 let layout = null
 let parent_div = null
 
-function onMenuAction(e){
+function onVertexMenuAction(e){
     console.log(`${e.detail.v.label} => ${e.detail.action}:${e.detail.type}`)
     if(e.detail.action == "layout"){
         e.detail.v.pinned = true
@@ -25,6 +25,25 @@ function onMenuAction(e){
             demo:0
         })
         .then(console.log("layout promise done"))
+    }
+}
+
+function onGlobalMenuAction(e){
+    let demo = (e.detail.action == "demo")?1:0
+    console.log(`graph_app> onGlobalMenuAction(demo=${demo})`)
+    layout.centrals_first(graph,{
+        width:parent_div.offsetWidth,
+        height:parent_div.offsetHeight,
+        demo:demo
+    })
+    .then(console.log("layout promise done"))
+}
+
+function onMenuAction(e){
+    if(e.detail.menu == "Vertex"){
+        onVertexMenuAction(e)
+    }else if(e.detail.menu == "Global"){
+        onGlobalMenuAction(e)
     }
 }
 
