@@ -1,5 +1,6 @@
 {
     "default_graph_file":"./data/GraphSON_blueprints.json",
+    "default_graph_file2":"./data/LesMiserables.graphml",
     "render":{
         "font":"Verdana",
         "font_height_px":16,

@@ -297,7 +297,7 @@ function select_vertex_position(v,placed,params){
     let best_cost = Number.MAX_VALUE;
     let costs = []
     const others_edges = get_placed_others_edges(v,placed)//not including own, computed once for all samples
-    const nb_samples = 1000
+    const nb_samples = 100
     let samples = samples_in_rect(nb_samples,params.width,params.height,v.viewBox.width,v.viewBox.height)
 
     for(let i=0;i<nb_samples;i++){
@@ -326,7 +326,7 @@ function select_vertex_position(v,placed,params){
         let best_sample = samples[best_index]
         v.viewBox.x = best_sample.x
         v.viewBox.y = best_sample.y
-        console.log(`    selected cost for ${v.label} (${v.viewBox.x},${v.viewBox.y}) : ${costs[best_index]}`)
+        //console.log(`    selected cost for ${v.label} (${v.viewBox.x},${v.viewBox.y}) : ${costs[best_index].toFixed(2)}`)
         //console.timeEnd("select_pos")
         if(g_demo_step!=0){
             plot_iteration(samples,best_index,costs)

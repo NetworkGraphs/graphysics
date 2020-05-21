@@ -1,9 +1,24 @@
-import {fetch_json} from "./utils.js"
+import {fetch_json,fetch_xml} from "./utils.js"
 import {defined} from "../libs/web-js-utils.js"
 
 let g = null;
 
-function replace(obj,good,bad){
+function element_to_map(element){
+    let res = {};
+    for(let j = 0; j < element.attributes.length; j++){
+        let attribute = element.attributes[j];
+        res[attribute.name] = attribute.value;
+    }
+    let data = element.getElementsByTagName("data");
+    for(let j = 0; j < data.length; j++){
+        let key = data[j].getAttribute("key");
+        let value = data[j].textContent;
+        res[key] = value;
+    }
+return res;
+}
+
+function replace(obj,bad,good){
     if(!defined(obj[good])){
         if(defined(obj[bad])){
             obj[good] = obj[bad]
@@ -15,20 +30,20 @@ function replace(obj,good,bad){
 function import_vertex(vertex){
     let res = vertex;
     res.label = defined(vertex.label)?vertex.label:vertex.name;
-    replace(res,"id","_id")
-    replace(res,"type","_type")
+    replace(res,"_id","id")
+    replace(res,"_type","type")
     return res;
 }
 
 function replace_edge(edge){
-    replace(edge,"id","_id")
-    replace(edge,"label","_label")
+    replace(edge,"_id","id")
+    replace(edge,"_label","label")
     if(!defined(edge.label) && defined(name)){
         edge.label = edge.name;
     }
-    replace(edge,"type","_type")
-    replace(edge,"inV","_inV")
-    replace(edge,"outV","_outV")
+    replace(edge,"_type","type")
+    replace(edge,"_inV", "inV")
+    replace(edge,"_outV","outV")
     edge.weight =defined(edge.weight)?edge.weight:1;
 }
 
@@ -67,7 +82,6 @@ function import_to_obj_graph(graph){
     graph.edges.forEach(edge => {
         res.edges[edge.id]=edge;
     });
-    add_references(res);
     return res;
 }
 
@@ -91,8 +105,38 @@ function import_json_graph(input){
     graph.edges.forEach(edge => {
         replace_edge(edge);
     });
-    
-    return import_to_obj_graph(graph);
+    let res = import_to_obj_graph(graph);
+    add_references(res);
+    return res
+}
+
+function import_xml_graph(xmlDoc){
+    let graph = {};
+    graph.vertices = {};
+    graph.edges = {};
+    let verticesNodes = xmlDoc.getElementsByTagName("node");
+    console.log(`graph> graphml file has ${verticesNodes.length} vertices`);
+    if(verticesNodes.length == 0){
+        alert("no vertices (nodes) found in graphml");
+        return;
+    }
+    for(let i = 0; i < verticesNodes.length; i++){
+        let v_node = verticesNodes[i];
+        let vid = v_node.getAttribute("id");
+        graph.vertices[vid] = element_to_map(v_node);
+    }
+    let edgeNodes = xmlDoc.getElementsByTagName("edge");
+    console.log(`graph> graphml file has ${edgeNodes.length} edges`);
+    for(let i = 0; i < edgeNodes.length; i++){
+        let e_node = edgeNodes[i];
+        let eid = e_node.getAttribute("id");
+        let edge = element_to_map(e_node);
+        replace(edge,"source","outV");
+        replace(edge,"target","inV");
+        graph.edges[eid] = edge;
+    }
+    add_references(graph);
+    return graph
 }
 
 class GraphIo{
@@ -110,6 +154,10 @@ class GraphIo{
                 g.edges = res.edges
                 return
             }else if(extension == "graphml"){
+                let xmlDoc = await fetch_xml(file)
+                let res = import_xml_graph(xmlDoc)
+                g.vertices = res.vertices
+                g.edges = res.edges
                 return
             }
         }else if(typeof(file) == "drop"){
