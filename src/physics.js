@@ -70,6 +70,7 @@ class Physics{
         engine.world.gravity.y = 0.0
 
         window.addEventListener( 'vertex_drag', onVertexDrag, false );
+        this.paused = false
     }
 
     create_bodies(parent_div){
@@ -91,8 +92,16 @@ class Physics{
             v.viewBox.moved |= true
         }
     }
-    
+    pause(){
+        this.paused = true
+    }
+    resume(){
+        this.paused = false
+    }
     run(){
+        if(this.paused){
+            return
+        }
         const{delta,correction} = get_delta_correction();
         Matter.Engine.update(engine,delta,correction);
         for(let [vid,v] of Object.entries(g.vertices)){

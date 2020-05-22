@@ -231,7 +231,16 @@ class Render{
                 </a>`)
     }
 
+    pause(){
+        this.paused = true
+    }
+    resume(){
+        this.paused = false
+    }
     update(){
+        if(this.paused){
+            return
+        }
         for(let [vid,v] of Object.entries(g.vertices)){
             if(v.viewBox.moved){
                 v.svg.group.setAttribute("transform", `translate(${v.viewBox.x},${v.viewBox.y}) rotate(${v.viewBox.angle})`);

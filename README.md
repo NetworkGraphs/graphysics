@@ -18,6 +18,8 @@ What is already available
   * Drag Node position with touch
   * Context menu (touch empty area, then second touch on Node)
   * Hover states with touch Node then touch empty area
+* Update Graph
+  * Drag and drop .graphml and  .json in Graphson Format
 
 ## Features Details
 * Node
@@ -44,7 +46,6 @@ What is planned to be implemented in the Future
   * light
   * filter effect
 * Update Graph
-  * Drag and drop .graphml .Graphson
   * Query Gremlin server
 * Global hierarchical context menu
 * Mouse actions

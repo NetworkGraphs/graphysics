@@ -47,6 +47,41 @@ function onMenuAction(e){
     }
 }
 
+function onDragEvents(event){
+    event.stopPropagation();
+    event.preventDefault();
+    if(event.type == "dragenter"){
+        event.dataTransfer.dropEffect = "copy";
+    }
+    if(event.type == "drop"){
+        if(event.dataTransfer.files.length == 1){
+            reload(event.dataTransfer.files[0])
+            .then(console.log("reload() done"))
+        }else{
+            console.warn("only one file drop allowed");
+            console.log(event.dataTransfer.files);
+        }
+    };
+}
+
+async function reload(file){
+    console.log(`graph_app> reloading file : ${file.name}`)
+    physics.pause()
+    render.pause()
+    await gio.import_file(file);
+    console.log(graph)
+    render.fitLabels()
+    //layout will define vertices boxes positions
+    await layout.centrals_first(graph,{width:parent_div.offsetWidth,height:parent_div.offsetHeight})
+    //create physical models of vertices boxes with their sizes and positions
+    physics.create_bodies(parent_div)
+    //creates svg elements of vertices boxes with their sizes and positions
+    render.create_graph()
+    physics.resume()
+    render.resume()
+    console.log("reload() end")
+}
+
 class GraphApp{
     constructor(){
         graph = {} // shared data between all singleton classes
@@ -56,6 +91,9 @@ class GraphApp{
         mouse = new Mouse()
         layout = new Layout()
         window.addEventListener( 'menu_action', onMenuAction, false );
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            document.addEventListener(eventName, onDragEvents, false)
+        });
     }
 
     async load(config,p_div){

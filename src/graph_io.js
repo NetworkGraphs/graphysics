@@ -139,6 +139,17 @@ function import_xml_graph(xmlDoc){
     return graph
 }
 
+function readFile(file){
+    return new Promise((resolve,reject)=>{
+        var reader = new FileReader();
+        reader.onloadend = function(e) {
+            resolve(reader.result)
+        };
+        reader.onerror = reject
+        reader.readAsText(file);
+    })
+}
+
 class GraphIo{
     constructor(graph_data){
         g = graph_data
@@ -152,7 +163,7 @@ class GraphIo{
                 let res = import_json_graph(data)
                 g.vertices = res.vertices
                 g.edges = res.edges
-                return
+                return g
             }else if(extension == "graphml"){
                 let xmlDoc = await fetch_xml(file)
                 let res = import_xml_graph(xmlDoc)
@@ -160,10 +171,32 @@ class GraphIo{
                 g.edges = res.edges
                 return
             }
-        }else if(typeof(file) == "drop"){
-
+        }else if(typeof(file) == "object"){
+			let extension = file.name.split('.').pop();
+			var reader = new FileReader();
+			if(extension == "json"){
+                let text_res = await readFile(file)
+                var result = JSON.parse(text_res);
+                let res = import_json_graph(result);
+                g.vertices = res.vertices
+                g.edges = res.edges
+                return
+    
+			}else if(extension == "graphml"){
+                let text_res = await readFile(file)
+                let parser = new DOMParser();
+                let xmlDoc = parser.parseFromString(text_res,"text/xml");
+                let res = import_xml_graph(xmlDoc);
+                g.vertices = res.vertices
+                g.edges = res.edges
+                return
+			}
+			else{
+				alert(`unsupported graph format '${extension}'`);
+			}
+			reader.readAsText(file);
         }else{
-            return
+            return ""
         }
     }
 
