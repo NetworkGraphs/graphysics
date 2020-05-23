@@ -1,9 +1,11 @@
 import {html,clear,send, defined} from "../libs/web-js-utils.js"
 import {Svg} from "../libs/svg_utils.js"
 import {Menu} from "./menu.js"
+import {Edge} from "./render/edge_render.js"
 
 let utl = new Svg()
 let menu = new Menu()
+let edge = new Edge()
 
 let g = null;
 let svg = null;
@@ -172,12 +174,12 @@ class Render{
         }`);
         this.sheet.insertRule(/*css*/`
         .edge.default {
-            stroke: ${default_color}
+            stroke: ${default_color};
+            fill:red
         }`);
         document.adoptedStyleSheets = [...document.adoptedStyleSheets, this.sheet];
     }
     
-
     fitLabels(){
         let check_canvas = document.createElement("canvas")
         let ctx = check_canvas.getContext("2d")
@@ -204,16 +206,7 @@ class Render{
         utl.filter_light_shadow(svg,{id:"f_drag",               lx:-20,ly:-10,lz:10,dx:15,dy:8})
         let g_edges = html(svg,/*html*/`<g ig="edges">`)
         for(let [eid,e] of Object.entries(g.edges)){
-            let [x1,y1,x2,y2] = [e.outV.viewBox.x,e.outV.viewBox.y,e.inV.viewBox.x,e.inV.viewBox.y]
-            let s_width = (1+e.weight*5)
-            e.svg = {}
-            e.svg.group = html(g_edges,/*html*/`<g id="edge_${e.label}"/>`)
-            e.svg.path = html(e.svg.group,/*html*/`<path id="e_p_${e.id}" class="edge path default" d="M ${x1} ${y1} L ${x2} ${y2}" stroke-width="${s_width}" />`)
-            e.svg.text = html(e.svg.group,/*html*/` <text class="e_text" class="edge text" >
-                                                        <textPath href="#e_p_${e.id}" startOffset="50%">
-                                                            ${e.label}
-                                                        </textPath>
-                                                    </text>`)
+            edge.line_create(g_edges,e)
         }
         let g_vertices = html(svg,/*html*/`<g id="vertices"/>`)
         for(let [vid,v] of Object.entries(g.vertices)){
@@ -243,13 +236,12 @@ class Render{
         }
         for(let [vid,v] of Object.entries(g.vertices)){
             if(v.viewBox.moved){
-                v.svg.group.setAttribute("transform", `translate(${v.viewBox.x},${v.viewBox.y}) rotate(${v.viewBox.angle})`);
+                v.svg.group.setAttribute("transform", `translate(${v.viewBox.x},${v.viewBox.y}) rotate(${180*v.viewBox.angle / Math.PI})`);
             }
         }
         for(let [eid,e] of Object.entries(g.edges)){
             if(e.outV.viewBox.moved || e.inV.viewBox.moved){
-                let [x1,y1,x2,y2] = [e.outV.viewBox.x,e.outV.viewBox.y,e.inV.viewBox.x,e.inV.viewBox.y]
-                e.svg.path.setAttribute("d",`M ${x1} ${y1} L ${x2} ${y2}`)
+                edge.line_update(e)
             }
         }
         for(let [vid,v] of Object.entries(g.vertices)){

@@ -112,7 +112,7 @@ class Physics{
             }
             v.viewBox.x = v.body.position.x
             v.viewBox.y = v.body.position.y
-            v.viewBox.angle = 180*v.body.angle / Math.PI
+            v.viewBox.angle = v.body.angle
             v.viewBox.moved |= (v.body.speed > 0)
         }
     }

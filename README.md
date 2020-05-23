@@ -19,7 +19,7 @@ What is already available
   * Context menu (touch empty area, then second touch on Node)
   * Hover states with touch Node then touch empty area
 * Update Graph
-  * Drag and drop .graphml and  .json in Graphson Format
+  * Drag and drop .graphml and .json in Graphson Format
 
 ## Features Details
 * Node

@@ -1,86 +1,14 @@
 import {obj_has} from "../utils.js"
 import {html,html_tag} from "../../libs/web-js-utils.js"
 
-let Vector = Matter.Vector
+import {Geometry} from "../../libs/geometry.js"
+let geom = new Geometry()
 
 let g_debug = false
 let g_demo_step = 0
 let svg = null
 let demo_svgs = []
 
-let min = Math.min
-let max = Math.max
-
-function center(va,vb){
-    return ({x:(va.x+vb.x)/2,y:(va.y+vb.y)/2})
-}
-
-/**
- * returns true if edges segments intersect each other (not the full lines scope)
- * common point segments will return true intersection result
- * @param {*} e1 
- * @param {*} e2 
- */
-function intersect(e1,e2){
-    const epsilon = 1
-    const epsilon_a = 0.0001
-    const x1 = e1.inV.viewBox.x
-    const y1 = e1.inV.viewBox.y
-    const x2 = e1.outV.viewBox.x
-    const y2 = e1.outV.viewBox.y
-    const x3 = e2.inV.viewBox.x
-    const y3 = e2.inV.viewBox.y
-    const x4 = e2.outV.viewBox.x
-    const y4 = e2.outV.viewBox.y
-
-    if(Math.max(x1,x2) < Math.min(x3,x4)){
-        return false
-    }
-    if(Math.min(x1,x2) > Math.max(x3,x4)){
-        return false
-    }
-    if(Math.max(y1,y2) < Math.min(y3,y4)){
-        return false
-    }
-    if(Math.min(y1,y2) > Math.max(y3,y4)){
-        return false
-    }
-    //we are within bounding boxes
-    if(Math.abs(x1-x2) < epsilon){//A1 is vertical
-        if((x3<x1)&&(x4>x1)){
-            return true
-        }
-        if((x3>x1)&&(x4<x1)){
-            return true
-        }
-    }
-    if(Math.abs(x3-x4) < epsilon){//A2 is vertical
-        if((x1<x3)&&(x2>x3)){
-            return true
-        }
-        if((x1>x3)&&(x2<x3)){
-            return true
-        }
-    }
-    //safe division as not vertical
-    const a1 = (y1-y2)/(x1-x2)
-    const a2 = (y3-y4)/(x3-x4)
-    if(Math.abs(a1-a2) < epsilon_a){//parallel
-        return false
-    }
-    //safe division as not parallel
-    const b1 = y1 - a1*x1
-    const b2 = y3 - a2*x3
-    const xa = (b2-b1)/(a1-a2)
-    if( ( xa < max(min(x1,x2), min(x3,x4)) )
-        ||
-        ( xa > min(max(x1,x2), max(x3,x4)) )
-    ){
-        return false
-    }else{
-        return true
-    }
-}
 
 function samples_in_rect(nb,w,h,box_w,box_h){
     let res = []
@@ -93,73 +21,13 @@ function samples_in_rect(nb,w,h,box_w,box_h){
     return res
 }
 
-function distance(va,vb){
-    const dx = va.x-vb.x
-    const dy = va.y-vb.y
-    return Math.sqrt(dx * dx + dy * dy)
-}
-
-function dist_sqr(va,vb){
-    const dx = va.x-vb.x
-    const dy = va.y-vb.y
-    return (dx * dx + dy * dy)
-}
-
-function walls_distance(point,w,h){
-    let walls_dist = []
-    walls_dist.push(Math.abs(point.x))
-    walls_dist.push(Math.abs(point.y))
-    walls_dist.push(Math.abs(w-point.x))
-    walls_dist.push(Math.abs(h-point.y))
-    return Math.min(...walls_dist)
-}
-
 function draw_edge_distance(p,projection,d,color,text){
     html_tag(demo_svgs,"path",/*html*/`<path d="M ${p.x} ${p.y} L ${projection.x} ${projection.y}" stroke="${color}" stroke-width="1" />`)
-    let c = center(p,projection)
+    let c = geom.center(p,projection)
     html(demo_svgs,/*html*/`<text x="${c.x}" y="${c.y}" class="d_text" dominant-baseline="middle" text-anchor="middle" style="pointer-events:none">${d.toFixed(2)}</text>`)
 }
 
-function edge_distance(point,edge){
-    const debug = false
-    const epsilon = 1//unit is pixels therefore 1 is already too small
-    const p = {x:point.viewBox.x,y:point.viewBox.y}
-    const e1 = {x:edge.inV.viewBox.x,y:edge.inV.viewBox.y}
-    const e2 = {x:edge.outV.viewBox.x,y:edge.outV.viewBox.y}
 
-    //if(g_demo_step!=0){html_tag(demo_svgs,"circle",/*html*/`<circle cx=${e1.x} cy=${e1.y} r="5" stroke="black" stroke-width="0" fill="green" />`)}
-    //if(g_demo_step!=0){html_tag(demo_svgs,"circle",/*html*/`<circle cx=${e2.x} cy=${e2.y} r="5" stroke="black" stroke-width="0" fill="green" />`)}
-    //if(g_demo_step!=0){html_tag(demo_svgs,"circle",/*html*/`<circle cx=${p.x} cy=${p.y} r="5" stroke="black" stroke-width="0" fill="blue" />`)}    
-    const length = dist_sqr(e1,e2)
-    if(length < epsilon){
-        return [distance(p,e1),false]
-    }
-    let t = ((p.x - e1.x) * (e2.x - e1.x) + (p.y - e1.y) * (e2.y - e1.y)) / length;
-    t = Math.max(0, Math.min(1, t));
-    const projection = {    x: e1.x + t * (e2.x - e1.x),
-                            y: e1.y + t * (e2.y - e1.y) }
-    //check if projection is outside the edge segment
-    const e1_p = Vector.sub(p,e1)
-    const p_e2 = Vector.sub(e2,p)
-    const e1_e2 = Vector.sub(e2,e1)
-    if(Vector.dot(e1_p,e1_e2) < 0){//point beyond e1
-        const d = distance(p,e1)
-        if((g_demo_step!=0)&&debug)draw_edge_distance(p,projection,d,"red",`${point.label} outside (${edge.inV.label} , ${edge.outV.label})`)
-        if(debug)console.log(`   ed:outside ${point.label} / (${edge.inV.label} , ${edge.outV.label}) => dist=${d}`)
-        return [d,false]
-    }else if(Vector.dot(e1_e2,p_e2) < 0){//point beyond e2
-        const d = distance(p,e2)
-        if((g_demo_step!=0)&&debug)draw_edge_distance(p,projection,d,"red",`${point.label} outside (${edge.inV.label} , ${edge.outV.label})`)
-        if(debug)console.log(`   ed:outside ${point.label} / (${edge.inV.label} , ${edge.outV.label}) => dist=${d}`)
-        return [d,false]
-    }else{
-        //if(g_demo_step!=0){html_tag(demo_svgs,"circle",/*html*/`<circle cx=${projection.x} cy=${projection.y} r="5" stroke="black" stroke-width="3" fill="green" />`)}
-        const d = distance(p,projection)
-        if((g_demo_step!=0)&&debug)draw_edge_distance(p,projection,d,"green",`${point.label} in (${edge.inV.label} , ${edge.outV.label})`)
-        if(debug)console.log(`   ed:inside ${point.label} / (${edge.inV.label} , ${edge.outV.label}) => dist=${d}`)
-        return [d,true]
-    }
-}
 
 function get_placed_others_edges(sample,placed_vertices){
     let edges = []
@@ -221,7 +89,7 @@ function interset_cost(sample,placed_vertices,others_edges,own_tobe_placed_edges
     //}
     for(let [oeid,own_e] of Object.entries(own_tobe_placed_edges)){
         for(let [eid,e] of Object.entries(others_edges)){
-            if(!common_vertex(own_e,e) && intersect(own_e,e)){
+            if(!common_vertex(own_e,e) && geom.intersect(own_e,e)){
                 //console.log(`  !intersection! : ${e.inV.label}-${e.outV.label} intersects with ${own_e.inV.label}-${own_e.outV.label}`)
                 /*stop processing and */return 10
             }
@@ -237,10 +105,10 @@ function neighbors_walls_cost(vertex,seeds,w,h){
     let sample = {x:vertex.viewBox.x,y:vertex.viewBox.y}
     let free_dist = []
     for(let j= 0;j<seeds.length;j++){
-        free_dist.push(distance(sample,seeds[j].viewBox))
+        free_dist.push(geom.distance(sample,seeds[j].viewBox))
     }
-    free_dist.push(walls_distance(sample,w,h))
-    const min_free_dist = Math.min(...free_dist)//the minimal distance is taken to reject the sample
+    free_dist.push(geom.walls_distance(sample,w,h))
+    const min_free_dist = Math.min(...free_dist)//the minimal geom.distance is taken to reject the sample
     return ((min_free_dist < 10)?10:(100.0/min_free_dist))
 }
 
@@ -249,7 +117,7 @@ function distance_to_edges_cost(vertex,placed,others_edges,own_tobe_placed_edges
     //console.log(`   checking other's edges ${vertex.label}`)
     others_edges.forEach((e)=>{
         if(!own_edge(vertex,e)){
-            const [dist,inside] = edge_distance(vertex,e)
+            const [dist,inside] = geom.edge_distance(vertex,e)
             free_dist.push(dist)
         }
     })
@@ -257,7 +125,7 @@ function distance_to_edges_cost(vertex,placed,others_edges,own_tobe_placed_edges
     own_tobe_placed_edges.forEach((e)=>{
         placed.forEach((vertex)=>{
             if(!own_edge(vertex,e)){
-                const [dist,inside] = edge_distance(vertex,e)
+                const [dist,inside] = geom.edge_distance(vertex,e)
                 if(inside){
                     free_dist.push(dist)
                 }
@@ -268,7 +136,7 @@ function distance_to_edges_cost(vertex,placed,others_edges,own_tobe_placed_edges
     if(free_dist.length == 0){
         return 0//no edges, no cost
     }else{
-        const min_free_dist = Math.min(...free_dist)//the minimal distance is taken to reject the sample
+        const min_free_dist = Math.min(...free_dist)//the minimal geom.distance is taken to reject the sample
         const cost = ((min_free_dist < 10)?10:(100.0/min_free_dist))
         //console.log(`   min dist ${vertex.label} (${vertex.viewBox.x},${vertex.viewBox.y}) is ${min_free_dist.toFixed(1)} costs: ${cost.toFixed(2)}`)
         return cost
