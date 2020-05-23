@@ -29,8 +29,8 @@ function betwee_angles(ref,a1,a2){
     let sum1 = mod_2_pi(ref - a1)
     let sum2 = mod_2_pi(a2 - ref)
     let res = ((sum1+sum2) <= pi)
-    console.log(`${ref.toFixed(2)}  ${res?"is":"is not"} between [${a1.toFixed(2)},${a2.toFixed(2)}] `)
-    console.log(`sum1=${sum1} sum2=${sum2} `)
+    //console.log(`${ref.toFixed(2)}  ${res?"is":"is not"} between [${a1.toFixed(2)},${a2.toFixed(2)}] `)
+    //console.log(`sum1=${sum1} sum2=${sum2} `)
     return res
 }
 
@@ -112,23 +112,25 @@ class Geometry{
         box.p3 = this.rel_to_abs(box,{x:-w2,y:-h2})
         box.p4 = this.rel_to_abs(box,{x:w2,y:-h2})
         let edge_box_angle = Vector.angle(p2,p1)
-        let deb = Vector.sub(p2,p1)
-        let angle = Math.atan2(deb.y, deb.x)
-        console.log(`(${edge.outV.label} - ${edge.inV.label}) [${deb.x.toFixed(2)},${deb.y.toFixed(2)}] angle = ${edge_box_angle.toFixed(2)} = ${angle.toFixed(2)}`)
+        //let deb = Vector.sub(p2,p1)
+        //let angle = Math.atan2(deb.y, deb.x)
+        //console.log(`(${edge.outV.label} - ${edge.inV.label}) [${deb.x.toFixed(2)},${deb.y.toFixed(2)}] angle = ${edge_box_angle.toFixed(2)} = ${angle.toFixed(2)}`)
         box.p1.angle = Vector.angle(box,box.p1)
         box.p2.angle = Vector.angle(box,box.p2)
         box.p3.angle = Vector.angle(box,box.p3)
         box.p4.angle = Vector.angle(box,box.p4)
         //console.log(box)
+        let int_point
         if(betwee_angles(edge_box_angle,box.p4.angle,box.p1.angle)){
-            return this.center(box.p1,box.p4)
+            int_point = this.intersection({v1:box.p1,v2:box.p4},{v1:p1,v2:p2})
         }else if(betwee_angles(edge_box_angle,box.p1.angle,box.p2.angle)){
-            return this.center(box.p1,box.p2)
+            int_point = this.intersection({v1:box.p1,v2:box.p2},{v1:p1,v2:p2})
         }else if(betwee_angles(edge_box_angle,box.p2.angle,box.p3.angle)){
-            return this.center(box.p2,box.p3)
+            int_point = this.intersection({v1:box.p2,v2:box.p3},{v1:p1,v2:p2})
         }else{
-            return this.center(box.p3,box.p4)
+            int_point = this.intersection({v1:box.p3,v2:box.p4},{v1:p1,v2:p2})
         }
+        return {angle:pi+edge_box_angle,x:int_point.x,y:int_point.y}
     }
 
     /**
@@ -145,6 +147,25 @@ class Geometry{
         const y3 = e2.v1.y
         const x4 = e2.v2.x
         const y4 = e2.v2.y
+        const x1_y2_m_y1_x2 = (x1*y2 - y1*x2)
+        const x3_y4_m_y3_x4 = (x3*y4 - y3*x4)
+        const denominator = ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4))
+        return {x:(x1_y2_m_y1_x2*(x3-x4) - (x1-x2)*x3_y4_m_y3_x4) / denominator,
+                y:(x1_y2_m_y1_x2*(y3-y4) - (y1-y2)*x3_y4_m_y3_x4) / denominator}
+    }
+
+    /**
+     * returns the intersection point of two lines defined by edge1={p1,p2} and edge2={p3,p4}
+     */
+    intersection_points(p1,p2,p3,p4){
+        const x1 = p1.x
+        const y1 = p1.y
+        const x2 = p2.x
+        const y2 = p2.y
+        const x3 = p3.x
+        const y3 = p3.y
+        const x4 = p4.x
+        const y4 = p4.y
         const x1_y2_m_y1_x2 = (x1*y2 - y1*x2)
         const x3_y4_m_y3_x4 = (x3*y4 - y3*x4)
         const denominator = ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4))

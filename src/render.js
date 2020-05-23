@@ -175,7 +175,7 @@ class Render{
         this.sheet.insertRule(/*css*/`
         .edge.default {
             stroke: ${default_color};
-            fill:red
+            fill:green
         }`);
         document.adoptedStyleSheets = [...document.adoptedStyleSheets, this.sheet];
     }
@@ -206,7 +206,7 @@ class Render{
         utl.filter_light_shadow(svg,{id:"f_drag",               lx:-20,ly:-10,lz:10,dx:15,dy:8})
         let g_edges = html(svg,/*html*/`<g ig="edges">`)
         for(let [eid,e] of Object.entries(g.edges)){
-            edge.line_create(g_edges,e)
+            edge.create(g_edges,e)
         }
         let g_vertices = html(svg,/*html*/`<g id="vertices"/>`)
         for(let [vid,v] of Object.entries(g.vertices)){
@@ -241,7 +241,7 @@ class Render{
         }
         for(let [eid,e] of Object.entries(g.edges)){
             if(e.outV.viewBox.moved || e.inV.viewBox.moved){
-                edge.line_update(e)
+                edge.update(e)
             }
         }
         for(let [vid,v] of Object.entries(g.vertices)){
