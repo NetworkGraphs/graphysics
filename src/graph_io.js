@@ -27,27 +27,49 @@ function replace(obj,bad,good){
     }
 }
 
-function import_vertex(vertex){
-    let res = vertex;
-    res.label = defined(vertex.label)?vertex.label:vertex.name;
-    replace(res,"_id","id")
-    replace(res,"_type","type")
-    return res;
+function select_label(obj){
+    if(!defined(obj.label) && defined(obj.name)){
+        obj.label = obj.name;
+    }
 }
 
-function replace_edge(edge){
-    replace(edge,"_id","id")
-    replace(edge,"_label","label")
-    if(!defined(edge.label) && defined(name)){
-        edge.label = edge.name;
-    }
-    replace(edge,"_type","type")
-    replace(edge,"_inV", "inV")
-    replace(edge,"_outV","outV")
+function rename_vertex(vertex){
+    replace(vertex,"_label","label")
+    replace(vertex,"_type", "type")
+
+    select_label(vertex)
+}
+
+function rename_edge(edge){
+    
+    replace(edge,"_label",  "label")
+    replace(edge,"_type",   "type")
+    replace(edge,"_inV",    "inV")
+    replace(edge,"_outV",   "outV")
+    replace(edge,"source",  "outV");
+    replace(edge,"target",  "inV");
+
+    select_label(edge)
     edge.weight =defined(edge.weight)?edge.weight:1;
 }
+function rename_properties(graph){
+    for(let [vid,v] of Object.entries(graph.vertices)){
+        rename_vertex(v)
+    }
+    for(let [eid,e] of Object.entries(graph.edges)){
+        rename_edge(e)
+    }
+}
+function rename_list_ids(graph){
+    graph.vertices.forEach(vertex => {
+        replace(vertex,"_id",   "id")
+    });
+    graph.edges.forEach(edge => {
+        replace(edge,"_id",   "id")
+    });
+}
 
-function add_references(graph){
+function add_references_from_ids(graph){
     for(let [vid,v] of Object.entries(graph.vertices)){
         v.neighbors = {};
         v.in_neighbors = {};
@@ -71,6 +93,47 @@ function add_references(graph){
         e.outV = graph.vertices[e.outV]
     }
 }
+
+function add_multi_edges_info(graph){
+    //reset counts to 0
+    for(let [vid,v] of Object.entries(graph.vertices)){
+        v.multi = {}
+        v.multi.edge_count = {}
+        v.multi.edge_index = {}
+        for(let [nid,neighbor] of Object.entries(v.neighbors)){
+            v.multi.edge_count[nid] = 0
+            v.multi.edge_index[nid] = 0
+        }
+    }
+    //add edges to each neighbor's counter
+    for(let [vid,v] of Object.entries(graph.vertices)){
+        for(let [eid,edge] of Object.entries(v.edges)){
+            let partner_id = (edge.inV.id != v.id)?edge.inV.id:edge.outV.id
+            v.multi.edge_count[partner_id] += 1
+        }
+    }
+    for(let [eid,e] of Object.entries(graph.edges)){
+        e.multi = {used:false}
+        const count = e.inV.multi.edge_count[e.outV.id]
+        const other_count_check = e.outV.multi.edge_count[e.inV.id]
+        if(count != other_count_check){
+            console.warn(`multi edge count failure with (${e.inV.label},${e.outV.label})`)
+        }
+        if(count > 1){
+            e.multi.used = true
+            e.multi.length = count
+            const current_index = e.inV.multi.edge_index[e.outV.id]
+            e.multi.rank = current_index
+            //to keep the index unique, increment in both duplicated structures (structures exist exactly x2 times)
+            e.inV.multi.edge_index[e.outV.id] += 1
+            e.outV.multi.edge_index[e.inV.id] += 1
+        }
+    }
+    for(let [vid,v] of Object.entries(graph.vertices)){
+        delete v.multi.edge_index   //after the loop, it has the same value as edge_count, so uselessly redundant
+    }
+}
+
 
 function import_to_obj_graph(graph){
     let res = {};
@@ -98,15 +161,8 @@ function import_json_graph(input){
             graph.edges = input.edges;
         }
     }
-    //    ----    Unify parameters names    ----
-    graph.vertices.forEach(vertex =>{
-        vertex = import_vertex(vertex);
-    });
-    graph.edges.forEach(edge => {
-        replace_edge(edge);
-    });
+    rename_list_ids(graph)//must be applied before the graph can be turned into a map (object)
     let res = import_to_obj_graph(graph);
-    add_references(res);
     return res
 }
 
@@ -131,11 +187,8 @@ function import_xml_graph(xmlDoc){
         let e_node = edgeNodes[i];
         let eid = e_node.getAttribute("id");
         let edge = element_to_map(e_node);
-        replace(edge,"source","outV");
-        replace(edge,"target","inV");
         graph.edges[eid] = edge;
     }
-    add_references(graph);
     return graph
 }
 
@@ -156,20 +209,15 @@ class GraphIo{
     }
 
     async import_file(file){
+        let res = null
         if(typeof(file) == "string"){
             let extension = file.split('.').pop();
             if(extension == "json"){
                 let data = await fetch_json(file)
-                let res = import_json_graph(data)
-                g.vertices = res.vertices
-                g.edges = res.edges
-                return g
+                res = import_json_graph(data)
             }else if(extension == "graphml"){
                 let xmlDoc = await fetch_xml(file)
-                let res = import_xml_graph(xmlDoc)
-                g.vertices = res.vertices
-                g.edges = res.edges
-                return
+                res = import_xml_graph(xmlDoc)
             }
         }else if(typeof(file) == "object"){
 			let extension = file.name.split('.').pop();
@@ -177,27 +225,28 @@ class GraphIo{
 			if(extension == "json"){
                 let text_res = await readFile(file)
                 var result = JSON.parse(text_res);
-                let res = import_json_graph(result);
-                g.vertices = res.vertices
-                g.edges = res.edges
-                return
+                res = import_json_graph(result);
     
 			}else if(extension == "graphml"){
                 let text_res = await readFile(file)
                 let parser = new DOMParser();
                 let xmlDoc = parser.parseFromString(text_res,"text/xml");
-                let res = import_xml_graph(xmlDoc);
-                g.vertices = res.vertices
-                g.edges = res.edges
-                return
+                res = import_xml_graph(xmlDoc);
 			}
 			else{
 				alert(`unsupported graph format '${extension}'`);
 			}
 			reader.readAsText(file);
-        }else{
-            return ""
         }
+        if(res == null){
+            return
+        }
+        rename_properties(res);
+        add_references_from_ids(res);
+        add_multi_edges_info(res);
+        g.vertices = res.vertices
+        g.edges = res.edges
+        return
     }
 
 }
