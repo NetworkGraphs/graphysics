@@ -13,6 +13,11 @@ let config = null;
 let menu_v = null;
 let attraction = false;
 
+const select_color    = "hsl(140, 80%, 50%)"
+const default_color   = "hsl(140, 80%, 90%)"
+const darken_color    = "hsl(140, 80%, 33%)"
+
+
 
 function onVertexMenuAction(e){
     if(e.detail.action == "pin"){
@@ -127,9 +132,6 @@ class Render{
         svg = html(parent_div,/*html*/`<svg id="main_svg" xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"></svg>`);
         g.svg = svg//shared for debug purpose only
         utl.set_parent(svg)
-        const select_color    = "hsl(140, 80%, 50%)"
-        const default_color   = "hsl(140, 80%, 90%)"
-        const darken_color    = "hsl(140, 80%, 33%)"
         this.sheet = new CSSStyleSheet()
         this.sheet.insertRule(/*css*/`
         .vertex.pinned {
@@ -175,7 +177,7 @@ class Render{
         this.sheet.insertRule(/*css*/`
         .edge.default {
             stroke: ${default_color};
-            fill:green
+            fill: ${darken_color}
         }`);
         document.adoptedStyleSheets = [...document.adoptedStyleSheets, this.sheet];
     }
@@ -196,6 +198,20 @@ class Render{
             }
             v.viewBox = {width:box.width+hm,height:height+vm}
         }
+        let e_vm = config.render.v_margin
+        let e_hm = config.render.h_margin
+        for(let [eid,e] of Object.entries(g.edges)){
+            if(defined(e.label)){
+                let box = ctx.measureText(e.label)
+                let height
+                if(defined(box.fontBoundingBoxAscent) && defined(box.fontBoundingBoxDescent)){
+                    height = box.fontBoundingBoxAscent + box.fontBoundingBoxDescent
+                }else{
+                    height = config.render.font_height_px
+                }
+                e.viewBox = {width:box.width+e_hm,height:height+e_vm}
+            }
+        }
     }
 
     create_graph(){
@@ -204,6 +220,7 @@ class Render{
         utl.filter_light_shadow(svg,{id:"f_default",            lx:-20,ly:-10,lz:10,dx:5,dy:2})
         utl.filter_light_shadow(svg,{id:"f_hover",              lx:-20,ly:-10,lz:10,dx:5,dy:2})
         utl.filter_light_shadow(svg,{id:"f_drag",               lx:-20,ly:-10,lz:10,dx:15,dy:8})
+        //utl.gradient_radial(svg,{id:"grad_1",colors:[default_color,darken_color]})
         let g_edges = html(svg,/*html*/`<g ig="edges">`)
         for(let [eid,e] of Object.entries(g.edges)){
             edge.create(g_edges,e)

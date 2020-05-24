@@ -1,4 +1,5 @@
 import {Vector} from "./Vector.js"
+import { defined } from "./web-js-utils.js"
 
 //* [wikipedia - lines intersection](https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection)
 
@@ -54,8 +55,20 @@ class Geometry{
         return min(...walls_dist)
     }
     
+    interpolate(p1,p2,dist){
+        const dir = Vector.normalise(Vector.sub(p2,p1))
+        return Vector.add(p1,Vector.mult(dir,dist))
+    }
+
     edge_offset(e,offset){
-        let [p1,p2] = [e.outV.viewBox,e.inV.viewBox]
+        let p1,p2
+        if(defined(e.p1) &&defined(e.p2)){
+            p1 = e.p1
+            p2 = e.p2
+        }else{
+            p1 = e.outV.viewBox
+            p2 = e.inV.viewBox
+        }
         const edge_dir = Vector.sub(p1,p2)
         let offset_dir = Vector.perp(edge_dir)
         let offset_dir_n = Vector.normalise(offset_dir)
@@ -102,8 +115,14 @@ class Geometry{
     }
 
     edge_box_int(edge,box){
-        let p1 = {x:edge.outV.viewBox.x,y:edge.outV.viewBox.y}
-        let p2 = {x:edge.inV.viewBox.x,y:edge.inV.viewBox.y}
+        let p1,p2
+        if(defined(edge.p1) &&defined(edge.p2)){
+            p1 = edge.p1
+            p2 = edge.p2
+        }else{
+            p1 = {x:edge.outV.viewBox.x,y:edge.outV.viewBox.y}
+            p2 = {x:edge.inV.viewBox.x,y:edge.inV.viewBox.y}
+        }
         let diag_angle = Math.atan2(box.height,box.width)
         const w2 = box.width / 2
         const h2 = box.height / 2

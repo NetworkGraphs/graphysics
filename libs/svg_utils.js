@@ -1,5 +1,14 @@
 import {defined,html,html_tag} from "./web-js-utils.js"
 
+function color_list_to_stops(color_list){
+    let res = ""
+    color_list.forEach((color,index)=>{
+        const percent = (100 * index / (color_list.length-1)).toFixed(0)
+        res += /*html*/`<stop offset="${percent}%" stop-color="${color}"/>`
+    })
+    return res
+}
+
 class Svg{
     constructor(svg_element){
         this.el = svg_element
@@ -178,7 +187,21 @@ class Svg{
                 <feDropShadow dx="${params.dx}" dy="${params.dy}" stdDeviation="3"></feDropShadow>
             </filter>`)
     }
-
+    gradient_linear(parent,params){
+        return html(parent,/*html*/`
+            <linearGradient id="${params.id}" x1="0%" y1="0%" x2="0%" y2="100%">
+            ${color_list_to_stops(params.colors)}
+            </linearGradient>
+            `)
+    }
+    gradient_radial(parent,params){
+        return html(parent,/*html*/`
+            <radialGradient id="${params.id}" cx="0%" cy="0%">
+            ${color_list_to_stops(params.colors)}
+            </radialGradient>
+            `)
+    }
+  
     save(fileName,evg_element=null){
         if(evg_element == null){evg_element = this.el}
         let s = new XMLSerializer();

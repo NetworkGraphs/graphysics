@@ -29,7 +29,11 @@ What is already available
   * pin / unpin
   * re-layout pinning current node
 * edges
+  * layout with distance to edges cost
   * labels on path
+  * edges arrows (on box-line intersection)
+  * labels text path adapts to keep text upwards
+  * multi edges support
 
 # Plan
 What is planned to be implemented in the Future
@@ -48,21 +52,23 @@ What is planned to be implemented in the Future
 * Update Graph
   * Query Gremlin server
 * Global hierarchical context menu
-* Mouse actions
+  * text input for queries
+* Layout
   * bring neighbors closer
+* Update Graph
   * reference node / edge Gremlin query
+* Mouse and Touch
+  * Pan zoom whole graph
+  * Zoom vertices labels
 * Performance
   * Analysis
   * Acceleration (wasm)
 
 ## Plan Details
-* cost of distance to edges
 * horizontality force
 * configure sampling number
-* edges with polylines and arrows
-* multi-edges
-* graph direction placement left to right for edge labels read
 * collect muliple css rules in one litteral string
+* polyline edges (complex concept, unclear and improvement might not be noticable)
 
 
 # Development
