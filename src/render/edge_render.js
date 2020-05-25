@@ -71,7 +71,7 @@ function line_arrow(e){
         let p4 = e.inV.viewBox
         let arrow = geom.edge_box_int({p1:p3,p2:p4},e.inV.viewBox)
         let a_path = path_arrow(arrow)
-        return `M ${p1.x},${p1.y}
+        let path=`M ${p1.x},${p1.y}
                 L ${p2.x},${p2.y}
                 L ${p3.x},${p3.y}
                 L ${arrow.base.x} ${arrow.base.y} 
@@ -81,6 +81,8 @@ function line_arrow(e){
                 L ${p2.x},${p2.y}
                 L ${p1.x},${p1.y}
                 `
+        //console.log(path)
+        return path
     }else{
         let arrow = geom.edge_box_int(e,e.inV.viewBox)
         let a_path = path_arrow(arrow)

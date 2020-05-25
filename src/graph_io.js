@@ -28,7 +28,16 @@ function replace(obj,bad,good){
 }
 
 function select_label(obj){
-    if(!defined(obj.label) && defined(obj.name)){
+    const prefer_name = true
+    if(prefer_name){
+        if(defined(obj.name)){
+            obj.label = obj.name;
+        }else if(defined(obj.properties)){
+            if(defined(obj.properties.name)){
+                obj.label = obj.properties.name[0].value
+            }
+        }
+    }else if(!defined(obj.label) && defined(obj.name)){
         obj.label = obj.name;
     }
 }
@@ -131,6 +140,11 @@ function add_multi_edges_info(graph){
     }
     for(let [vid,v] of Object.entries(graph.vertices)){
         delete v.multi.edge_index   //after the loop, it has the same value as edge_count, so uselessly redundant
+    }
+}
+function init_forces(graph){
+    for(let [vid,v] of Object.entries(graph.vertices)){
+        v.forces = {used:false}
     }
 }
 
@@ -244,6 +258,7 @@ class GraphIo{
         rename_properties(res);
         add_references_from_ids(res);
         add_multi_edges_info(res);
+        init_forces(res);
         g.vertices = res.vertices
         g.edges = res.edges
         return

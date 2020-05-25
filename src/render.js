@@ -196,7 +196,7 @@ class Render{
             }else{
                 height = config.render.font_height_px
             }
-            v.viewBox = {width:box.width+hm,height:height+vm}
+            v.viewBox = {width:box.width+hm,height:height+vm,x:0,y:0,angle:0}
         }
         let e_vm = config.render.v_margin
         let e_hm = config.render.h_margin
@@ -209,7 +209,7 @@ class Render{
                 }else{
                     height = config.render.font_height_px
                 }
-                e.viewBox = {width:box.width+e_hm,height:height+e_vm}
+                e.viewBox = {width:box.width+e_hm,height:height+e_vm,x:0,y:0,angle:0}
             }
         }
     }

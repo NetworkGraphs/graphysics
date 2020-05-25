@@ -60,6 +60,11 @@ class Geometry{
         return Vector.add(p1,Vector.mult(dir,dist))
     }
 
+    modulate(p1,p2,dist){
+        const dir = Vector.normalise(Vector.sub(p2,p1))
+        return Vector.mult(dir,dist)
+    }
+
     edge_offset(e,offset){
         let p1,p2
         if(defined(e.p1) &&defined(e.p2)){

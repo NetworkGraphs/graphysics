@@ -25,6 +25,15 @@ function onVertexMenuAction(e){
             demo:0
         })
         .then(console.log("layout promise done"))
+    }else if(e.detail.action == "attract"){
+        let forces = e.detail.v.forces
+        if(e.detail.type == "start"){
+            forces.used = true
+            forces.attract_neighbors = true
+        }else if(e.detail.type == "end"){
+            forces.used = false
+            forces.attract_neighbors = false
+        }
     }
 }
 

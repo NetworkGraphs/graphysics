@@ -5,6 +5,10 @@ function defined(obj){
     return (typeof(obj) != "undefined")
 }
 
+function true_defined(obj){
+    return ((typeof(obj) != "undefined") &&(obj == true))
+}
+
 function uid(){
     return Date.now()+"_"+Math.floor(Math.random() * 10000)
 }
@@ -127,5 +131,6 @@ export{
     htmls,
     clear,
     add_sheet,
-    remove_sheet
+    remove_sheet,
+    true_defined
 }

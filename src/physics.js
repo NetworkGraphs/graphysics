@@ -1,4 +1,6 @@
-import { defined } from "../libs/web-js-utils.js";
+import { defined,true_defined } from "../libs/web-js-utils.js";
+import {Geometry} from "../../libs/geometry.js"
+let geom = new Geometry()
 
 let g = null;
 let engine = null;
@@ -63,6 +65,43 @@ function onVertexDrag(e){
     }
 }
 
+function keep_horizontal(body){
+    const delta = 0 - body.angle;
+    body.torque = 0.5 * delta;//P controller, the air friction will do the rest
+}
+function dist_to_force(dist){
+    let force = 0
+    if(dist < 150){
+        force = -0.03;
+    }
+    if(dist > 250){
+        force = 0.03;
+    }
+    return force
+}
+function attract_neighbors(vertex){
+    for(let [vid,v] of Object.entries(vertex.neighbors)){
+        const dist = geom.distance(vertex.body.position,v.body.position)
+        const force = dist_to_force(dist)
+        if(force != 0){
+            let v_force = geom.modulate(v.body.position,vertex.body.position,force)
+            v.body.force = v_force
+            console.log(`forcing ${v.label} <= ${vertex.label} : ${force} (${v_force.x.toFixed(1)},${v_force.y.toFixed(1)})`)
+        }
+    }
+}
+
+function apply_custom_forces(){
+    for(let [vid,v] of Object.entries(g.vertices)){
+        keep_horizontal(v.body);
+        if(v.forces.used){
+            if(true_defined(v.forces.attract_neighbors)){
+                attract_neighbors(v);
+            }
+        }
+    }
+}
+
 class Physics{
     constructor(graph_data){
         g = graph_data
@@ -102,6 +141,8 @@ class Physics{
         if(this.paused){
             return
         }
+
+        apply_custom_forces();
         const{delta,correction} = get_delta_correction();
         Matter.Engine.update(engine,delta,correction);
         for(let [vid,v] of Object.entries(g.vertices)){
