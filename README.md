@@ -34,6 +34,9 @@ What is already available
   * edges arrows (on box-line intersection)
   * labels text path adapts to keep text upwards
   * multi edges support
+* Layout Forces
+  * Keep Nodes horizontal
+  * bring neighbors closer
 
 # Plan
 What is planned to be implemented in the Future
@@ -53,8 +56,6 @@ What is planned to be implemented in the Future
   * Query Gremlin server
 * Global hierarchical context menu
   * text input for queries
-* Layout
-  * bring neighbors closer
 * Update Graph
   * reference node / edge Gremlin query
 * Mouse and Touch
@@ -65,10 +66,10 @@ What is planned to be implemented in the Future
   * Acceleration (wasm)
 
 ## Plan Details
-* horizontality force
-* configure sampling number
-* collect muliple css rules in one litteral string
+* configure sampling number (in config file)
 * polyline edges (complex concept, unclear and improvement might not be noticable)
+Style in js :
+* collect muliple css rules in one litteral string
 
 
 # Development

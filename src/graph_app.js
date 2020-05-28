@@ -3,6 +3,7 @@ import { Render } from "./render.js"
 import { Physics } from "./physics.js"
 import { Mouse } from "./mouse.js"
 import { Layout } from "./layout.js";
+import { Mutate } from "./mutate.js";
 
 //singelton protected members
 let graph   = null
@@ -11,6 +12,7 @@ let render  = null
 let physics = null
 let mouse   = null
 let layout = null
+let mutate = null
 let parent_div = null
 
 function onVertexMenuAction(e){
@@ -34,6 +36,10 @@ function onVertexMenuAction(e){
             forces.used = false
             forces.attract_neighbors = false
         }
+    }else if(e.detail.action == "group"){
+        mutate.group(graph,e.detail.v)
+    }else if(e.detail.action == "ungroup"){
+        mutate.ungroup(graph,e.detail.v)
     }
 }
 
@@ -95,10 +101,12 @@ class GraphApp{
     constructor(){
         graph = {} // shared data between all singleton classes
         gio = new GraphIo(graph)
-        render = new Render(graph)
+        render = new Render()
+        render.init(graph)
         physics = new Physics(graph)
         mouse = new Mouse()
         layout = new Layout()
+        mutate = new Mutate()
         window.addEventListener( 'menu_action', onMenuAction, false );
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             document.addEventListener(eventName, onDragEvents, false)

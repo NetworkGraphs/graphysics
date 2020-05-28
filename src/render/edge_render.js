@@ -129,7 +129,12 @@ class Edge{
         }
         e.svg = svg
     }
-
+    hide(e){
+        e.svg.group.setAttribute("visibility","hidden")
+    }
+    show(e){
+        e.svg.group.setAttribute("visibility","visible")
+    }
     update(e){
         if(e.svg.path.classList.contains("d_arrow")){
             e.svg.path.setAttribute("d",line_arrow(e))

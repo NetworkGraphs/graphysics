@@ -147,6 +147,11 @@ function init_forces(graph){
         v.forces = {used:false}
     }
 }
+function init_groups(graph){
+    for(let [vid,v] of Object.entries(graph.vertices)){
+        v.group = {used:false,backup:{}}
+    }
+}
 
 
 function import_to_obj_graph(graph){
@@ -259,6 +264,7 @@ class GraphIo{
         add_references_from_ids(res);
         add_multi_edges_info(res);
         init_forces(res);
+        init_groups(res);
         g.vertices = res.vertices
         g.edges = res.edges
         return

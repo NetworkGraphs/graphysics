@@ -28,6 +28,14 @@ function onVertexMenuAction(e){
         e.detail.v.pinned = false
         e.detail.v.svg.shape.classList.remove("pinned")
         menu.update_action("unpin","pin")
+    }else if(e.detail.action == "group"){
+        e.detail.v.grouped = true
+        e.detail.v.svg.shape.classList.add("grouped")
+        menu.update_action("group","ungroup")
+    }else if(e.detail.action == "ungroup"){
+        e.detail.v.grouped = false
+        e.detail.v.svg.shape.classList.remove("grouped")
+        menu.update_action("ungroup","group")
     }
 }
 
@@ -44,9 +52,12 @@ function onVertexContextMenu(e){
         menu_v = g.vertices[e.detail.id]
         let vb = menu_v.viewBox
         let pin_name = menu_v.pinned?"unpin":"pin"
-        let buttons = menu.call({svg:svg,menu:"Vertex",x:vb.x,y:vb.y,actions:["attract","layout",pin_name]})
-        buttons[pin_name].addEventListener(    'click', (e)=>{send("menu_action",{menu:"Vertex",type:"click",action:e.target.getAttribute("data-name"),v:menu_v} )}, false );
-        buttons["layout"].addEventListener( 'click', (e)=>{send("menu_action",{menu:"Vertex",type:"click",action:e.target.getAttribute("data-name"),v:menu_v} )}, false );
+        let group_name = menu_v.grouped?"ungroup":"group"
+        let buttons = menu.call({svg:svg,menu:"Vertex",x:vb.x,y:vb.y,actions:["attract","layout",pin_name,group_name]})
+        let buttonMenuclick = (e)=>{send("menu_action",{menu:"Vertex",type:"click",action:e.target.getAttribute("data-name"),v:menu_v} )}
+        buttons[pin_name].addEventListener( 'click', buttonMenuclick, false );
+        buttons["layout"].addEventListener( 'click', buttonMenuclick, false );
+        buttons[group_name].addEventListener( 'click', buttonMenuclick, false );
         buttons["attract"].addEventListener('mousedown', (e)=>{
             send("menu_action",{menu:"Vertex",type:"start",action:e.target.getAttribute("data-name"),v:menu_v} )
             attraction = true
@@ -118,7 +129,7 @@ function onVertexDrag(e){
 }
 
 class Render{
-    constructor(graph_data){
+    init(graph_data){
         g = graph_data
         window.addEventListener( 'vertex_hover', onVertexHover, false );
         window.addEventListener( 'vertex_drag', onVertexDrag, false );
@@ -240,7 +251,18 @@ class Render{
                     <image x="0" y="${svg.parentElement.clientHeight-50}" height="30" xlink:href="${config.github.image}" ></image>
                 </a>`)
     }
-
+    hide_edge(e){
+        edge.hide(e)
+    }
+    remove_hover(v){
+        v.svg.shape.classList.remove("hoverneighbor")
+    }
+    show_edge(e){
+        edge.show(e)
+    }
+    add_hover(v){
+        v.svg.shape.classList.add("hoverneighbor")
+    }
     pause(){
         this.paused = true
     }
