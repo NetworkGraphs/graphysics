@@ -77,7 +77,7 @@ Style in js :
 * SVG : Raw, no libraries, only trensparent utils
 
 ## Limitations and issues
-* centrality algo does not necessarily match neighborhood propagation which could result in cross edges cost inconsistencies
+* centrality algo and neighborhood propagation algo might need better optimization and rules
 
 # References
 Follow project up from [NetworkGraphs/graph2d](https://github.com/NetworkGraphs/graph2d)
