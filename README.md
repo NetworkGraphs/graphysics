@@ -89,8 +89,10 @@ Follow project up from [NetworkGraphs/graph2d](https://github.com/NetworkGraphs/
 * [CSS Filters](https://developer.mozilla.org/en-US/docs/Web/CSS/filter)
 
 ## Graph tools and libraries
-### Javascript
-* [Cytoscape](https://js.cytoscape.org/) : Graph theory (network) library for visualisation and analysis
+### web javascript
+* [Graphviz](http://www.graphviz.org/) : dot language interpreter (powering plantUML), split in algo modules (dot, neato,...), community forum, wasm port, SVG export, but static layout, no interactivity concept.
+* [Vis.js](https://visjs.org/) : Network module, canvas rendering, physics included, modular. No deep interactivity (context menu, editing graph view characteristics). User cannot fix nodes position. Library and not ready to use as a web comp.
+* [Cytoscape](https://js.cytoscape.org/) : Graph theory (network) library for visualisation and analysis. Canvas based, js is rendering only, layouting limited to the java framework.
 * [Sigma.js](http://sigmajs.org/) : Sigma is a JavaScript library dedicated to graph drawing. It makes easy to publish networks on Web pages, and allows developers to integrate network exploration in rich Web applications.
 ### Java
 * [Gephi](https://gephi.org/) : State of the art graph editing and analysis, focus on big graphs
