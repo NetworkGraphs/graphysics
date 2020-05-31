@@ -1,10 +1,35 @@
 # graphysics
-Graph with collision Physics, using SVG with style, Interactive Nodes mutations and cost based partial layouting
+Graph with collision Physics, using SVG with style, Interactive Nodes mutations and cost based partial layout
 
 # Live demo
 https://networkgraphs.github.io/graphysics/
 
-# Concept
+# Gif demo
+## interactive light and shadow svg filters
+
+<img src="./media/demo_hover.gif" width="400">
+
+## multi rank edges with labels on path
+
+<img src="./media/demo_labels.gif" width="400">
+
+## animated radial context menu
+
+<img src="./media/demo_menu.gif" width="400">
+
+## cost layout with sampling optimisation
+
+<img src="./media/cost_layout.gif">
+
+## Nodes Collisions to ensure labels visibility
+
+<img src="./media/nodes_collisions.gif">
+
+## Force attract neighbors
+<img src="./media/attract_neighbors.gif">
+
+# Concepts
+
 This project focus on small graphs, which node labels keep readable at all times within the given parent viewport dimensions.
 
 Its main goal is to provide a fully autonomous front end webapp and webcomponent that requires no configuration. No drawing data required such as edge length, standard graph files are enough (Graphson, graphml,...).
@@ -16,6 +41,12 @@ Graphics rely on the SVG standard, which is fully interactive through live attri
 Deep interactivity is provided out of the box for nodes drag, partial layout, focused force attractions, and nodes mutation (through groups and properties).
 
 Graph exploration is planned to allow Gremlin query based graph expansion and filtering.
+
+## Global Layout concept
+>The Holy Grail of graph layout is to combine all the features of all the layouts but it's probably impossible.
+> [Gordon Woodhull](https://github.com/dagrejs/dagre/issues/258#issuecomment-465255491) (Graphviz, Dagre)
+
+In this project, the initial layout is performed with a cost based optimisation of multiple criteria with global random sampling. Although it is not possible to sattisfy all criteria all the time, with a cost based approach that alligns all criteria on a common cost scale, it should be possible to adjust the weight of each creteria when needed.
 
 # Features
 What is already available
@@ -46,7 +77,7 @@ What is already available
   * labels on path
   * edges arrows (on box-line intersection)
   * labels text path adapts to keep text upwards
-  * multi edges support
+  * multi-rank edges support
 * Layout Forces
   * Keep Nodes horizontal
   * bring neighbors closer
