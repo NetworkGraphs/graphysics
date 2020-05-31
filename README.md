@@ -11,9 +11,9 @@ Its main goal is to provide a fully autonomous front end webapp and webcomponent
 
 A pure javascript approach is taken, no transpilers, no React, yet powerful litteral strings allow parametric html, css and svg integration in javascript.
 
-Graphics rely on the SVG standard, which is fully interactive through live parameters updates, SVG filters and SVG animation, and allows standard styling techniques with classes and CSS rules.
+Graphics rely on the SVG standard, which is fully interactive through live attributes updates, SVG filters and SVG animations. SVG allows styling with CSS classes and rules, therefore it's important not to restrict CSS by wrapping it through a custom domain language like many libraries do.
 
-Deep interactivity is provided by not only moving nodes, but also partial layouting, focused force attractions, and nodes mutation (through groups and properties)
+Deep interactivity is provided not only by moving nodes, but also partial layouting, focused force attractions, and nodes mutation (through groups and properties). This interactivity is ensured by a full app scope development and not restricting the focus on layout only or rendering only.
 
 Graph exploration is planned to allow Gremlin query based graph expansion and filtering.
 
@@ -102,25 +102,36 @@ Follow project up from [NetworkGraphs/graph2d](https://github.com/NetworkGraphs/
 * [CSS Filters](https://developer.mozilla.org/en-US/docs/Web/CSS/filter)
 
 ## Graph tools and libraries
+### Frameworks
+* [Graphviz](http://www.graphviz.org/) : C++, SVG, dot language, Layout, Static, Community
+
+dot language interpreter (powering plantUML), split in algo modules (dot, neato,...), [community forum](https://forum.graphviz.org/), SVG export, but static layout, no interactivity concept as it is an independent layout engine.
+
+* [Gephi](https://gephi.org/) : Java, layout, analysis
+
+State of the art graph editing and analysis, focus on big graphs, interface for Gremlin queries
+
 ### web libraries
-* [Graphviz](http://www.graphviz.org/) : SVG, dot language, Layout, Static, Community
+* [Vis.js (Graphviz)](https://visjs.org/) : Canvas, Layout, interactive
 
-dot language interpreter (powering plantUML), split in algo modules (dot, neato,...), community forum, wasm port, SVG export, but static layout, no interactivity concept.
-* [Vis.js](https://visjs.org/) : Canvas, Layout, interactive
+Network module, canvas rendering, physics included, modular. limited interactivity (no context menu,no editing of view characteristics). User cannot fix nodes position. Library requires app dev for integration. Despite the active c++ Graphviz project, the js version is considered a hack (port not clean design) by the author, and link to the follow up project [Dagre](https://github.com/dagrejs). Nevertheless it is widely used and even has a wasm (web accelerated) version. [Graphviz wasm forum](https://forum.graphviz.org/t/graphviz-wasm-2-44-0/38), [graphviz-wasm](https://github.com/CyberhavenInc/graphviz-wasm), [npm graphvizlib.wasm](https://www.npmjs.com/package/@hpcc-js/wasm)
 
-Network module, canvas rendering, physics included, modular. limited interactivity (no context menu,no editing of view characteristics). User cannot fix nodes position. Library requires app dev for integration.
-* [Cytoscape](https://js.cytoscape.org/) : Canvas, Viewer only, interactive
+* [Dagre](https://github.com/dagrejs) : SVG d3, Layout, interactive, dot language
 
-Graph theory (network) library for visualisation and analysis. Canvas based, js is rendering only, layouting to be provided by a backend java framework.
-* [Sigma.js](http://sigmajs.org/) : WebGL or Canvas, json gexf import, pan zoom highlight
+Github (2.3k + 2.8k). [interactive demo](https://dagrejs.github.io/project/dagre-d3/latest/demo/interactive-demo.html) zoom pan, style in dot, [exploration demo](http://cs.brown.edu/people/jcmace/d3/graph.html?id=small.json) with interactive context menu, multiple selections (neighbors, paths,...), partial layouting. Dagre is used by Cytoscape, TensorFlow,... CSS styling through d3.
+
+* [Cytoscape](https://js.cytoscape.org/) : Canvas, interactive
+
+Graph theory (network) library for visualisation and analysis. Canvas based. Cytoscape is a java based framework and the js front end has limited functionnalities, it is nevertheless a framework that allows all sorts of plugis ([Dagre](https://github.com/cytoscape/cytoscape.js-dagre), [Cola](https://github.com/cytoscape/cytoscape.js-cola),...) for layouting and other interactivity features.
+* [Sigma.js](http://sigmajs.org/) : WebGL or Canvas, json gexf import, pan zoom highlight, 9k Stars
 
 Facilitates web integration by importing standard graph formats (json, gefx), rendering based (webGL or Canvas). Interactivity limited to pan zoom and highlight of neighbor clusters, the user cannot move the nodes.
 * [yFiles for html](https://www.yworks.com/products/yfiles-for-html): Commercial, Complex licensing, Html5 and svg, Fully configurable, interactive
 
 Advanced layout algos configuration, Hierarchical grouping, multiple sorts of diagrams and routing techniques. No neighborhood based interactivity (e.g. highlight neighbors). Prohibitively Complex licensing unusual for for Front end js webapps.
+* [WebCola](https://github.com/tgdwyer/WebCola) : SVG d3, constraint based layout, interactive
 
-### Java application
-* [Gephi](https://gephi.org/) : State of the art graph editing and analysis, focus on big graphs
+Research community based development, 1.5K Stars, 2D and 3D using three.js, support of grouping, no overlap constraints, stable dynamics, no context menu.
 
 ## Graph Databases
 Although this project focus is small graphs limited to a number of nodes with viewable labels, the exploration part could be performed on a huge graph that is filtered and partially displayed through user exploration.
