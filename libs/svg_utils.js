@@ -164,7 +164,7 @@ class Svg{
 
     filter_light_shadow(parent,params){
         return html(parent,/*html*/`
-            <filter id="${params.id}" width="200%" height="200%">
+            <filter id="${params.id}" x="-50%" width="200%" y="-50%" height="200%">
                 <feDiffuseLighting in="SourceGraphic" result="light" light-color="white">
                     <fePointLight x="${params.lx}" y="${params.ly}" z="${params.lz}"></fePointLight>
                 </feDiffuseLighting>

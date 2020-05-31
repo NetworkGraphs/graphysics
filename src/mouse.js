@@ -26,12 +26,14 @@ function onMousePan(e){
                 if(!state.over_vertex){
                     state.id = e.target.id
                     state.over_vertex = true
-                    event("vertex_hover",{type:"enter",id:state.id})
+                    event("vertex_hover",{type:"enter",id:state.id,x:pointer_x,y:pointer_y})
                 }else{
                     if(e.target.id != state.id){
                         event("vertex_hover",{type:"exit",id:state.id})//exit old
                         state.id = e.target.id
-                        event("vertex_hover",{type:"enter",id:state.id})//enter new
+                        event("vertex_hover",{type:"enter",id:state.id,x:pointer_x,y:pointer_y})//enter new
+                    }else{
+                        event("vertex_hover",{type:"move",id:state.id,x:pointer_x,y:pointer_y})
                     }
                 }
             }else{

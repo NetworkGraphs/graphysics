@@ -12,6 +12,7 @@ let svg = null;
 let config = null;
 let menu_v = null;
 let attraction = false;
+let f_hover = {main:null,pointLight:null,dropShadow:null}
 
 const select_color    = "hsl(140, 80%, 50%)"
 const default_color   = "hsl(140, 80%, 90%)"
@@ -116,6 +117,14 @@ function onVertexHover(e){
         }
         console.log(`hover exit: ${vertex.label}`)
     }
+    if(e.detail.type != "exit"){
+        let lx = vertex.viewBox.x - e.detail.x        
+        let ly = vertex.viewBox.y - e.detail.y
+        f_hover.pointLight.setAttribute("x",-lx)
+        f_hover.pointLight.setAttribute("y",-ly)
+        f_hover.dropShadow.setAttribute("dx",lx/5)
+        f_hover.dropShadow.setAttribute("dy",ly/5)
+    }
 }
 
 function onVertexDrag(e){
@@ -156,8 +165,10 @@ class Render{
         }`);
         this.sheet.insertRule(/*css*/`
         .vertex.hover {
-            filter: url(#f_default);
-            fill :  ${select_color}
+            filter: url(#f_hover);
+            fill :  ${select_color};
+            //cursor: grab;
+            //cursor: none;
         }`);
         this.sheet.insertRule(/*css*/`
         .vertex.hoverneighbor {
@@ -227,11 +238,13 @@ class Render{
 
     create_graph(){
         clear(svg)
-        utl.filter_light(       svg,{id:"f_pinned",            lx:-20,ly:-10,lz:10})
-        utl.filter_light_shadow(svg,{id:"f_default",            lx:-20,ly:-10,lz:10,dx:5,dy:2})
-        utl.filter_light_shadow(svg,{id:"f_hover",              lx:-20,ly:-10,lz:10,dx:5,dy:2})
-        utl.filter_light_shadow(svg,{id:"f_drag",               lx:-20,ly:-10,lz:10,dx:15,dy:8})
+                        utl.filter_light(       svg,{id:"f_pinned",            lx:-20,ly:-10,lz:10})
+                        utl.filter_light_shadow(svg,{id:"f_default",            lx:-20,ly:-10,lz:10,dx:5,dy:2})
+        f_hover.main =  utl.filter_light_shadow(svg,{id:"f_hover",              lx:-20,ly:-10,lz:10,dx:5,dy:2})
+                        utl.filter_light_shadow(svg,{id:"f_drag",               lx:-20,ly:-10,lz:10,dx:15,dy:8})
         //utl.gradient_radial(svg,{id:"grad_1",colors:[default_color,darken_color]})
+        f_hover.pointLight = f_hover.main.getElementsByTagName("fePointLight")[0]
+        f_hover.dropShadow = f_hover.main.getElementsByTagName("feDropShadow")[0]
         let g_edges = html(svg,/*html*/`<g ig="edges">`)
         for(let [eid,e] of Object.entries(g.edges)){
             edge.create(g_edges,e)
