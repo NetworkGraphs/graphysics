@@ -26,6 +26,7 @@ function get_pointers_Firefox(e,t_id){
     }
     return [pointer_x,pointer_y]
 }
+
 function get_pointers_default(e,t_id){
     let pointer_x = defined(e.offsetX)?e.offsetX:   ((e.touches.length>0)?(e.touches[t_id].pageX):state.offset.x)
     let pointer_y = defined(e.offsetY)?e.offsetY:   ((e.touches.length>0)?(e.touches[t_id].pageY):state.offset.y)
