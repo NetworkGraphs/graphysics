@@ -31,8 +31,10 @@ function remove(){
         console.log("menu over")
         state.active = false
         event("context_menu",{menu:params.menu,type:"end"})
-        remove_sheet(sheet)
-        //can't remove sheet : document.adoptedStyleSheets.splice(document.adoptedStyleSheets.indexOf(sheet))
+        if(sheet!=null){
+            remove_sheet(sheet)
+        }
+        //can't remove sheet with : document.adoptedStyleSheets.splice(document.adoptedStyleSheets.indexOf(sheet))
     }
 }
 
@@ -95,6 +97,17 @@ class Menu{
                 texts[action].setAttribute("visibility","visible")
             },200+i*50)
         })
+        try{
+            this.add_style_sheet()
+        }
+        catch(err){
+            console.log(err)
+            console.log(`adding style failed, falling back on old style`)
+            this.add_style_element(menu_svg)
+        }
+        return buttons
+    }
+    add_style_sheet(){
         sheet = new CSSStyleSheet()
         sheet.insertRule(/*css*/`
         path.pie_element{
@@ -114,7 +127,25 @@ class Menu{
             color:hsl(240, 80%, 65%)
         }`)
         add_sheet(sheet)
-        return buttons
+    }
+    add_style_element(parent){
+        this.style_string = /*css*/`
+        path.pie_element{
+            fill:hsl(140, 80%, 35%)
+        }
+        path.pie_element:hover{
+            fill:hsl(140, 80%, 45%)
+        }
+        path.pie_element:hover:active{
+            fill:hsl(140, 80%, 65%)
+        }
+        text.m_text{
+            font: bold 12px Verdana, Helvetica, Arial, sans-serif;
+            color:hsl(240, 80%, 65%)
+        }`
+        let style = document.createElement("style")
+        style.innerHTML = this.style_string
+        parent.appendChild(style);
     }
     update_action(old_action_name,new_action_name){
         let pie = buttons[old_action_name]
