@@ -8,13 +8,36 @@ function onContext(e){
     e.stopPropagation();
 }
 
+function get_pointers_Firefox(e,t_id){
+    let pointer_x,pointer_y
+    if(defined(e.offsetX)){
+        pointer_x = e.offsetX
+        pointer_y = e.offsetY
+    }else if(defined(e.layerX))
+    {
+        pointer_x = e.layerX
+        pointer_y = e.layerY
+    }else if(e.touches.length>0){
+        pointer_x = e.touches[t_id].pageX
+        pointer_y = e.touches[t_id].pageY
+    }else{
+        pointer_x = state.offset.x
+        pointer_y = state.offset.y
+    }
+    return [pointer_x,pointer_y]
+}
+function get_pointers_default(e,t_id){
+    let pointer_x = defined(e.offsetX)?e.offsetX:   ((e.touches.length>0)?(e.touches[t_id].pageX):state.offset.x)
+    let pointer_y = defined(e.offsetY)?e.offsetY:   ((e.touches.length>0)?(e.touches[t_id].pageY):state.offset.y)
+    return [pointer_x,pointer_y]
+}
+
 function onMousePan(e){
     const is_vertex = e.target.classList.contains("vertex")
     let pointe_1 = defined(e.buttons)?(e.buttons == 1):(e.touches.length == 1)
     let pointer_2 = defined(e.buttons)?(e.buttons == 2):(e.touches.length == 2)
     let t_id = pointer_2?1:0
-    let pointer_x = defined(e.offsetX)?e.offsetX:   ((e.touches.length>0)?(e.touches[t_id].pageX):state.offset.x)
-    let pointer_y = defined(e.offsetY)?e.offsetY:   ((e.touches.length>0)?(e.touches[t_id].pageY):state.offset.y)
+    let [pointer_x,pointer_y] = get_pointers_default(e,t_id)
     let vdx = pointer_x - state.offset.x;
     let vdy = pointer_y - state.offset.y;
     //console.log(`tx:${vdx},ty:${vdy}    px:${e.touches[0].PageX},py:${e.touches[0].PageY}`)
