@@ -1,5 +1,5 @@
 import { defined,true_defined } from "../libs/web-js-utils.js";
-import {Geometry} from "../../libs/geometry.js"
+import {Geometry} from "../libs/geometry.js"
 let geom = new Geometry()
 
 let g = null;
