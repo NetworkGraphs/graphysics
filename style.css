@@ -1,0 +1,36 @@
+.vertex.pinned {
+    filter: url(#f_pinned);
+    fill :  hsl(100,80%,60%)
+}
+.vertex.drag {
+    filter: url(#f_drag);
+    fill :  hsl(140, 80%, 50%)
+}
+.vertex.hover {
+    filter: url(#f_default);
+    fill :  hsl(140, 80%, 50%)
+}
+.vertex.hoverneighbor {
+    filter: url(#f_default);
+    fill :  hsl(140, 80%, 50%)
+}
+.vertex.default {
+    filter: url(#f_default);
+    fill :  hsl(140, 80%, 90%)
+}
+.v_text {
+    font: 16px Verdana
+}
+.d_text {
+    font: 16px Verdana
+}
+.e_text {
+    font: 16px Verdana
+}
+.edge.hover {
+    stroke: hsl(140, 80%, 50%)
+}
+.edge.default {
+    stroke: hsl(140, 80%, 90%);
+    fill: hsl(140, 80%, 33%)
+}

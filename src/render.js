@@ -197,7 +197,7 @@ class Render{
         }`);
         document.adoptedStyleSheets = [...document.adoptedStyleSheets, this.sheet];
     }
-    add_style_element(){
+    add_style_element(parent){
         this.style_string = /*css*/`
         .vertex.pinned {
             filter: url(#f_pinned);
@@ -237,24 +237,27 @@ class Render{
         }`
         let style = document.createElement("style")
         style.innerHTML = this.style_string
-        document.getElementsByTagName("head")[0].appendChild(style);
+        parent.appendChild(style);
     }
 
     create_svg(parent_div,cfg){
         config = cfg
         let [w,h] = [parent_div.offsetWidth,parent_div.offsetHeight]
+        if(h == 0){
+            h = window.innerHeight
+        }
+        console.log(`width = ${w} , height = ${h}`)
         svg = html(parent_div,/*html*/`<svg id="main_svg" xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"></svg>`);
         g.svg = svg//shared for debug purpose only
         utl.set_parent(svg)
-        //this.add_style_element()
-        //try{
-        //    this.add_style_sheet()
-        //}
-        //catch(err){
-        //    console.log(err)
-        //    console.log(`adding style failed, falling back on old style`)
-        //    this.add_style_element()
-        //}
+        try{
+            this.add_style_sheet()
+        }
+        catch(err){
+            console.log(err)
+            console.log(`adding style failed, falling back on old style`)
+            this.add_style_element(svg)
+        }
     }
     
     fitLabels(){
@@ -271,7 +274,6 @@ class Render{
             }else{
                 height = config.render.font_height_px
             }
-            console.log(height)
             v.viewBox = {width:box.width+hm,height:height+vm,x:0,y:0,angle:0}
         }
         let e_vm = config.render.v_margin
