@@ -136,13 +136,7 @@ class Render{
         window.addEventListener( 'context_menu', onContextMenu, false );
         window.addEventListener( 'menu_action', onMenuAction, false );
     }
-
-    create_svg(parent_div,cfg){
-        config = cfg
-        let [w,h] = [parent_div.offsetWidth,parent_div.offsetHeight]
-        svg = html(parent_div,/*html*/`<svg id="main_svg" xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"></svg>`);
-        g.svg = svg//shared for debug purpose only
-        utl.set_parent(svg)
+    add_style_sheet(){
         this.sheet = new CSSStyleSheet()
         this.sheet.insertRule(/*css*/`
         .vertex.pinned {
@@ -192,6 +186,65 @@ class Render{
         }`);
         document.adoptedStyleSheets = [...document.adoptedStyleSheets, this.sheet];
     }
+    add_style_element(){
+        this.style_string = /*css*/`
+        .vertex.pinned {
+            filter: url(#f_pinned);
+            fill :  hsl(100,80%,60%)
+        }
+        .vertex.drag {
+            filter: url(#f_drag);
+            fill :  ${select_color}
+        }
+        .vertex.hover {
+            filter: url(#f_default);
+            fill :  ${select_color}
+        }
+        .vertex.hoverneighbor {
+            filter: url(#f_default);
+            fill :  ${select_color}
+        }
+        .vertex.default {
+            filter: url(#f_default);
+            fill :  ${default_color}
+        }
+        .v_text {
+            font: ${config.render.font_height_px}px ${config.render.font}
+        }
+        .d_text {
+            font: ${config.render.font_height_px}px ${config.render.font}
+        }
+        .e_text {
+            font: ${config.render.font_height_px}px ${config.render.font}
+        }
+        .edge.hover {
+            stroke: ${select_color}
+        }
+        .edge.default {
+            stroke: ${default_color};
+            fill: ${darken_color}
+        }`
+        let style = document.createElement("style")
+        style.innerHTML = this.style_string
+        document.getElementsByTagName("head")[0].appendChild(style);
+    }
+
+    create_svg(parent_div,cfg){
+        config = cfg
+        let [w,h] = [parent_div.offsetWidth,parent_div.offsetHeight]
+        svg = html(parent_div,/*html*/`<svg id="main_svg" xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"></svg>`);
+        g.svg = svg//shared for debug purpose only
+        utl.set_parent(svg)
+        //this.add_style_element()
+        //try{
+        //    this.add_style_sheet()
+        //}
+        //catch(err){
+        //    console.log(err)
+        //    console.log(`adding style failed, falling back on old style`)
+        //    this.add_style_element()
+        //}
+    }
     
     fitLabels(){
         let check_canvas = document.createElement("canvas")
@@ -207,6 +260,7 @@ class Render{
             }else{
                 height = config.render.font_height_px
             }
+            console.log(height)
             v.viewBox = {width:box.width+hm,height:height+vm,x:0,y:0,angle:0}
         }
         let e_vm = config.render.v_margin
