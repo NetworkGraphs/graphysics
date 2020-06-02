@@ -113,6 +113,13 @@ function add_sheet(sheet){
     document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
 }
 
+function add_members(obj_dest,obj_src){
+    for(let [id,item] of Object.entries(obj_src)){
+        if(!(id in obj_dest)){
+            obj_dest[id] = item
+        }
+    }
+}
 
 export{
     html,
@@ -132,5 +139,6 @@ export{
     clear,
     add_sheet,
     remove_sheet,
-    true_defined
+    true_defined,
+    add_members
 }
