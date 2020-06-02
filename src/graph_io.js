@@ -78,6 +78,12 @@ function rename_list_ids(graph){
     });
 }
 
+/**
+ * an edge goes from its outV to its inV
+ * an out_neighbor is a neighbor which common edge is going out to
+ * an in_neighbor is a neighbor which common edge is coming in from
+ * @param {*} graph 
+ */
 function add_references_from_ids(graph){
     for(let [vid,v] of Object.entries(graph.vertices)){
         v.neighbors = {};

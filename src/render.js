@@ -106,7 +106,7 @@ function onVertexHover(e){
         for(let [eid,e] of Object.entries(vertex.edges)){
             e.svg.path.classList.add("hover")
         }
-        console.log(`hover enter: ${vertex.label}`)
+        console.log(`hover enter: ${vertex.label} (${vertex.id})`)
     }else if(e.detail.type == "exit"){
         vertex.svg.shape.classList.remove("hover")
         for(let [vid,v] of Object.entries(vertex.neighbors)){
