@@ -68,6 +68,7 @@ class Mutate{
             remove_neighbors_edges(v,vertex,gr.edges)
             render.remove_hover(v)
         }
+        render.create_group(vertex)
     }
     ungroup(g,vertex){
         let gr = vertex.group
@@ -90,7 +91,7 @@ class Mutate{
         for(let [eid,e] of Object.entries(vertex.edges)){
             render.show_edge(e)
         }
-        console.log(g)
+        render.remove_group(vertex)
     }
 }
 

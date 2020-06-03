@@ -121,6 +121,13 @@ function add_members(obj_dest,obj_src){
     }
 }
 
+function add_style_element(parent, string){
+    let style = document.createElement("style")
+    style.innerHTML = string
+    parent.appendChild(style);
+}
+
+
 export{
     html,
     br,hr,
@@ -140,5 +147,6 @@ export{
     add_sheet,
     remove_sheet,
     true_defined,
-    add_members
+    add_members,
+    add_style_element
 }

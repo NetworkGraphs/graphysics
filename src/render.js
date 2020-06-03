@@ -2,13 +2,16 @@ import {html,clear,send, defined} from "../libs/web-js-utils.js"
 import {Svg} from "../libs/svg_utils.js"
 import {Menu} from "./menu.js"
 import {Edge} from "./render/edge_render.js"
+import {Group} from "./render/group_render.js"
 
 let utl = new Svg()
 let menu = new Menu()
 let edge = new Edge()
+let group = new Group()
 
 let g = null;
 let svg = null;
+let g_groups = null;
 let config = null;
 let menu_v = null;
 let attraction = false;
@@ -315,11 +318,22 @@ class Render{
             v.svg.group.setAttribute("transform", `translate(${v.viewBox.x},${v.viewBox.y}) rotate(${0})`);
         }
 
+        g_groups = html(svg,/*html*/`<g ig="groups">`)
+
         html(svg,/*html*/`
                 <a href="${config.github.link}" target="_blank">
                     <image x="0" y="${svg.parentElement.clientHeight-50}" height="30" xlink:href="${config.github.image}" ></image>
                 </a>`)
     }
+
+    create_group(v){
+        group.create(g_groups,v)
+    }
+
+    remove_group(v){
+        group.remove(g_groups,v)
+    }
+
     hide_edge(e){
         edge.hide(e)
     }
@@ -345,6 +359,16 @@ class Render{
         for(let [vid,v] of Object.entries(g.vertices)){
             if(v.viewBox.moved){
                 v.svg.group.setAttribute("transform", `translate(${v.viewBox.x},${v.viewBox.y}) rotate(${180*v.viewBox.angle / Math.PI})`);
+                if(v.group.used){
+                    group.update(v)
+                }
+            }else if(v.group.used){
+                for(let [nid,n] of Object.entries(v.group.neighbors)){
+                    if(n.viewBox.moved){
+                        group.update(v)
+                        break;
+                    }
+                }
             }
         }
         for(let [eid,e] of Object.entries(g.edges)){

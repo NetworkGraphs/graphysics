@@ -1,4 +1,4 @@
-import {html,html_tag,add_sheet,remove_sheet,defined} from "../libs/web-js-utils.js"
+import {html,html_tag,add_sheet,remove_sheet,defined,add_style_element} from "../libs/web-js-utils.js"
 import {event} from "./utils.js"
 import {Svg} from "../libs/svg_utils.js"
 
@@ -103,7 +103,7 @@ class Menu{
         catch(err){
             console.log(err)
             console.log(`adding style failed, falling back on old style`)
-            this.add_style_element(menu_svg)
+            this.add_style(menu_svg)
         }
         return buttons
     }
@@ -128,8 +128,8 @@ class Menu{
         }`)
         add_sheet(sheet)
     }
-    add_style_element(parent){
-        this.style_string = /*css*/`
+    add_style(parent){
+        add_style_element(parent,/*css*/`
         path.pie_element{
             fill:hsl(140, 80%, 35%)
         }
@@ -142,10 +142,7 @@ class Menu{
         text.m_text{
             font: bold 12px Verdana, Helvetica, Arial, sans-serif;
             color:hsl(240, 80%, 65%)
-        }`
-        let style = document.createElement("style")
-        style.innerHTML = this.style_string
-        parent.appendChild(style);
+        }`)
     }
     update_action(old_action_name,new_action_name){
         let pie = buttons[old_action_name]
