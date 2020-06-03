@@ -6,7 +6,7 @@ import {Vector} from "../../libs/Vector.js"
 import {Geometry} from "../../libs/geometry.js"
 let geom = new Geometry()
 
-function group_vertices(vertex){
+function group_lines(vertex){
     let d = `M ${vertex.viewBox.x},${vertex.viewBox.y} `
     for(let [vid,v] of Object.entries(vertex.group.neighbors)){
         d += `L ${v.viewBox.x},${v.viewBox.y} `
@@ -15,23 +15,34 @@ function group_vertices(vertex){
     return d
 }
 
+function group_box(vertex){
+    let box = geom.vertices_box(vertex)
+    let d = `   M ${box.x},${box.y}
+                L ${box.x+box.width},${box.y}
+                L ${box.x+box.width},${box.y+box.height}
+                L ${box.x},${box.y+box.height}
+                L ${box.x},${box.y}
+                `
+    return d
+}
+
 class Group{
 
     create(top_svg,vertex){
         let svg = {}
         svg.group       = html(top_svg,/*html*/`<g id="group_vert_${vertex.id}"/>`)
-        svg.path        = html(svg.group,/*html*/`<path class="vert_group" d="${group_vertices(vertex)}"/>`)
+        svg.path        = html(svg.group,/*html*/`<path class="vert_group lines" d="${group_box(vertex)}"/>`)
         vertex.group.svg = svg
         add_style_element(top_svg,/*css*/`
         path.vert_group{
-            fill        :rgba(0,0,0,0.4);
+            fill        :rgba(0,0,0,0.2);
             stroke-width:2;
             stroke      :#840221;
             pointer-events:none;
         `)
     }
     update(vertex){
-        vertex.group.svg.path.setAttribute("d",group_vertices(vertex))
+        vertex.group.svg.path.setAttribute("d",group_box(vertex))
     }
     remove(top_svg,vertex){
         top_svg.removeChild(vertex.group.svg.group)

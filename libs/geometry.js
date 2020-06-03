@@ -284,6 +284,58 @@ class Geometry{
             return (res.id == id)
         }
     }
+
+    bounding_box(vertices){
+        let max_x = Number.MIN_VALUE
+        let max_y = Number.MIN_VALUE
+        let min_x = Number.MAX_VALUE
+        let min_y = Number.MAX_VALUE
+        console.log(vertices)
+        for(let [vid,v] of Object.entries(vertices)){
+            if(v.viewBox.x < min_x){
+                min_x = v.viewBox.x
+            }
+            if(v.viewBox.x > max_x){
+                max_x = v.viewBox.x
+            }
+            if(v.viewBox.y < min_y){
+                min_y = v.viewBox.y
+            }
+            if(v.viewBox.y > max_y){
+                max_y = v.viewBox.y
+            }
+        }
+        return {x:min_x,y:min_y,width:max_x-min_x,height:max_y-min_y}
+    }
+
+    vertices_box(vertex){
+        let w2 = vertex.viewBox.width / 2
+        let h2 = vertex.viewBox.height / 2
+        let min_x = vertex.viewBox.x - w2
+        let min_y = vertex.viewBox.y - h2
+        let max_x = vertex.viewBox.x + w2
+        let max_y = vertex.viewBox.y + h2
+        for(let [vid,v] of Object.entries(vertex.group.neighbors)){
+            let wv2 = v.viewBox.width / 2
+            let hv2 = v.viewBox.height / 2
+            let tx = v.viewBox.x - wv2
+            let bx = v.viewBox.x + wv2
+            let ty = v.viewBox.y - hv2
+            let by = v.viewBox.y + hv2
+            if(tx < min_x){
+                min_x = tx
+            }else if( bx > max_x){
+                max_x = bx
+            }
+            if(ty < min_y){
+                min_y = ty
+            }else if(by > max_y){
+                max_y = by
+            }
+        }
+        return {x:min_x,y:min_y,width:max_x-min_x,height:max_y-min_y}
+    }
+
 }
 
 export{Geometry}
