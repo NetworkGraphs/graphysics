@@ -324,12 +324,14 @@ class Geometry{
             let by = v.viewBox.y + hv2
             if(tx < min_x){
                 min_x = tx
-            }else if( bx > max_x){
+            }
+            if( bx > max_x){
                 max_x = bx
             }
             if(ty < min_y){
                 min_y = ty
-            }else if(by > max_y){
+            }
+            if(by > max_y){
                 max_y = by
             }
         }
