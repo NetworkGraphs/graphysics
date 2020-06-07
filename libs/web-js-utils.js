@@ -121,10 +121,24 @@ function add_members(obj_dest,obj_src){
     }
 }
 
+function get_if_defined(dest,src,member){
+    if(defined(src[member])){
+        dest[member] = src[member]
+    }
+}
+
 function add_style_element(parent, string){
     let style = document.createElement("style")
     style.innerHTML = string
     parent.appendChild(style);
+}
+function replace(obj,bad,good){
+    if(!defined(obj[good])){
+        if(defined(obj[bad])){
+            obj[good] = obj[bad]
+            delete obj[bad]
+        }
+    }
 }
 
 
@@ -148,5 +162,7 @@ export{
     remove_sheet,
     true_defined,
     add_members,
-    add_style_element
+    add_style_element,
+    get_if_defined,
+    replace
 }

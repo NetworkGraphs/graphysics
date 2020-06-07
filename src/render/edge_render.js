@@ -24,8 +24,9 @@ function edge_label_offset(e){
     let [v1,v2] = [e.outV.viewBox,e.inV.viewBox]
     const offset = rank_to_offset(e)
     const length = geom.distance(v1,v2)
-    const p1_dist = (length/2)-(e.viewBox.width/2)
-    const p2_dist = p1_dist + e.viewBox.width
+    let view_box_width = defined(e.viewBox)?e.viewBox.width:0
+    const p1_dist = (length/2)-(view_box_width/2)
+    const p2_dist = p1_dist + view_box_width
     const dir = Vector.normalise(Vector.sub(v2,v1))
     let p1 = Vector.add(v1,Vector.mult(dir,p1_dist))
     let p2 = Vector.add(v1,Vector.mult(dir,p2_dist))

@@ -1,5 +1,5 @@
 import {fetch_json,fetch_xml} from "./utils.js"
-import {defined} from "../libs/web-js-utils.js"
+import {defined,get_if_defined,replace} from "../libs/web-js-utils.js"
 import {graphviz} from "../libs/graphviz.js"
 
 
@@ -19,15 +19,6 @@ function element_to_map(element){
         res[key] = value;
     }
 return res;
-}
-
-function replace(obj,bad,good){
-    if(!defined(obj[good])){
-        if(defined(obj[bad])){
-            obj[good] = obj[bad]
-            delete obj[bad]
-        }
-    }
 }
 
 function select_label(obj){
@@ -236,14 +227,18 @@ function import_dot_graph(dot){
     let dot_height = parseFloat(dot.bb.split(',')[3])
 
     function is_group(obj){return (defined(obj.bb) && defined(obj.nodes))}
-    function is_not_group(obj){return (defined(obj.shape))}
+    function is_not_group(obj){return (defined(obj.pos))}
     function gv_group_to_vertex(obj){
         let group_v = {id:obj._gvid,name:obj.name,label:obj.label}
-        if(defined(obj.color)){
-            group_v.color = obj.color
+        get_if_defined(group_v,obj,"color")
+        if(defined(obj.lp)){
+            let [x,y] = obj.lp.split(',')
+            group_v.viewBox = {x:parseFloat(x),y:dot_height-parseFloat(y)}
+        }else{
+            let [tx,ty,bx,by] = obj.bb.split(',')
+            group_v.viewBox = { x:(parseFloat(tx)+parseFloat(bx))/2,
+                                y:dot_height-parseFloat(by)}
         }
-        let [x,y] = obj.lp.split(',')
-        group_v.viewBox = {x:parseFloat(x),y:dot_height-parseFloat(y)}
         obj.nodes.forEach((vid)=>{
             graph.edges[add_edge_id] = {id:add_edge_id, inV:vid,outV:group_v.id,type:"edge",label:"group"}
             add_edge_id += 1
@@ -253,12 +248,18 @@ function import_dot_graph(dot){
     }
     function gv_to_vertex(obj){
         let vertex = {id:obj._gvid,name:obj.name,label:obj.label,color:obj.color}
-        if(defined(obj.color)){
-            vertex.color = obj.color
-        }
-        if(defined(obj.shape)){
-            vertex.shape = obj.shape
-        }
+        get_if_defined(vertex,obj,"color")
+        get_if_defined(vertex,obj,"shape")
+        let [x,y] = obj.pos.split(',')
+        vertex.viewBox = {x:parseFloat(x),y:dot_height-parseFloat(y)}
+        return vertex
+    }
+    function gv_safe_to_vertex(obj){
+        let vertex = {id:obj._gvid}
+        get_if_defined(vertex,obj,"name")
+        get_if_defined(vertex,obj,"label")
+        get_if_defined(vertex,obj,"color")
+        get_if_defined(vertex,obj,"shape")
         let [x,y] = obj.pos.split(',')
         vertex.viewBox = {x:parseFloat(x),y:dot_height-parseFloat(y)}
         return vertex
@@ -288,7 +289,8 @@ function import_dot_graph(dot){
         }else if(is_not_group(obj)){
             graph.vertices[vid] = gv_to_vertex(obj)
         }else{
-            console.warn(`${obj.name} could not be identified`)
+            console.warn(`vertex ${obj._gvid} could not be identified`)
+            //graph.vertices[vid] = gv_safe_to_vertex(obj)
         }
     })
     dot.edges.forEach((edge,eid)=>{
@@ -362,6 +364,7 @@ class GraphIo{
         if(res == null){
             return
         }
+        console.log(res)
         rename_properties(res);
         add_references_from_ids(res);
         add_multi_edges_info(res);
