@@ -69,6 +69,7 @@ class Mutate{
             render.remove_hover(v)
         }
         render.create_group(vertex)
+        vertex.svg.shape.classList.add("group")
     }
     ungroup(g,vertex){
         let gr = vertex.group
@@ -92,6 +93,7 @@ class Mutate{
             render.show_edge(e)
         }
         render.remove_group(vertex)
+        vertex.svg.shape.classList.remove("group")
     }
 }
 

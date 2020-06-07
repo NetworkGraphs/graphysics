@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/NetworkGraphs/graphysics#readme",
   "dependencies": {
+    "@hpcc-js/wasm": "^0.3.14",
     "matter-js": "^0.14.2",
     "web-js-utils": "^2.1.0"
   }

@@ -4,6 +4,7 @@ import { Physics } from "./physics.js"
 import { Mouse } from "./mouse.js"
 import { Layout } from "./layout.js";
 import { Mutate } from "./mutate.js";
+import { defined } from "../libs/web-js-utils.js";
 
 //singelton protected members
 let graph   = null
@@ -79,22 +80,51 @@ function onDragEvents(event){
     };
 }
 
-async function reload(file){
-    console.log(`graph_app> reloading file : ${file.name}`)
-    physics.pause()
-    render.pause()
-    await gio.import_file(file);
+function mutate_group_vertices(){
+    for(let [vid,v] of Object.entries(graph.vertices)){
+        if(v.group.used){
+            mutate.group(graph,v)
+        }
+    }
+}
+
+async function common_load(file,reload,config={}){
+    if(reload){
+        console.log(`graph_app> reloading file : ${file.name}`)
+        physics.pause()
+        render.pause()
+    }
+    await gio.import_file(file,config.io)
     console.log(graph)
+    if(!reload){
+        //required svg before create_graph()
+        render.create_svg(parent_div,config)
+    }
+    //defines vertices boxes sizes
     render.fitLabels()
-    //layout will define vertices boxes positions
-    await layout.centrals_first(graph,{width:parent_div.offsetWidth,height:parent_div.offsetHeight})
+    if(!graph.layout_done){
+        //layout will define vertices boxes positions
+        await layout.centrals_first(graph,{width:parent_div.offsetWidth,height:parent_div.offsetHeight})
+    }
     //create physical models of vertices boxes with their sizes and positions
     physics.create_bodies(parent_div)
     //creates svg elements of vertices boxes with their sizes and positions
     render.create_graph()
-    physics.resume()
-    render.resume()
-    console.log("reload() end")
+    mutate_group_vertices()
+
+    if(reload){
+        physics.resume()
+        render.resume()
+        console.log("reload() end")
+    }else{
+        mouse.init(parent_div)
+    }
+
+}
+
+async function reload(file){
+    await common_load(file,true)
+    return
 }
 
 class GraphApp{
@@ -115,19 +145,8 @@ class GraphApp{
 
     async load(config,p_div){
         parent_div = p_div
-        await gio.import_file(config.default_graph_file)
-        console.log(graph)
-        //required svg before create_graph()
-        render.create_svg(parent_div,config)
-        //defines vertices boxes sizes
-        render.fitLabels()
-        //layout will define vertices boxes positions
-        await layout.centrals_first(graph,{width:parent_div.offsetWidth,height:parent_div.offsetHeight})
-        //create physical models of vertices boxes with their sizes and positions
-        physics.create_bodies(parent_div)
-        //creates svg elements of vertices boxes with their sizes and positions
-        render.create_graph()
-        mouse.init(parent_div)
+        await common_load(config.default_graph_file,false,config)
+        return
     }
 
     run(){

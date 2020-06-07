@@ -17,6 +17,7 @@ function group_lines(vertex){
 
 function group_box(vertex){
     let box = geom.vertices_box(vertex)
+    vertex.group.viewBox = box
     let d = `   M ${box.x},${box.y}
                 L ${box.x+box.width},${box.y}
                 L ${box.x+box.width},${box.y+box.height}
@@ -35,7 +36,7 @@ class Group{
         vertex.group.svg = svg
         add_style_element(top_svg,/*css*/`
         path.vert_group{
-            fill        :rgba(0,0,0,0.2);
+            fill        :rgba(0,0,0,0.1);
             stroke-width:2;
             stroke      :#840221;
             pointer-events:none;

@@ -1,4 +1,4 @@
-import {html,clear,send, defined} from "../libs/web-js-utils.js"
+import {html,clear,send, defined, add_style_element} from "../libs/web-js-utils.js"
 import {Svg} from "../libs/svg_utils.js"
 import {Menu} from "./menu.js"
 import {Edge} from "./render/edge_render.js"
@@ -151,6 +151,10 @@ class Render{
     add_style_sheet(){
         this.sheet = new CSSStyleSheet()
         this.sheet.insertRule(/*css*/`
+        .vertex.group {
+            fill :  rgba(0,0,0,0.2)
+        }`);
+        this.sheet.insertRule(/*css*/`
         .vertex.pinned {
             filter: url(#f_pinned);
             fill :  hsl(100,80%,60%)
@@ -200,8 +204,8 @@ class Render{
         }`);
         document.adoptedStyleSheets = [...document.adoptedStyleSheets, this.sheet];
     }
-    add_style_element(parent){
-        this.style_string = /*css*/`
+    add_se(parent){
+        add_style_element(parent,/*css*/`
         .vertex.pinned {
             filter: url(#f_pinned);
             fill :  hsl(100,80%,60%)
@@ -237,10 +241,7 @@ class Render{
         .edge.default {
             stroke: ${default_color};
             fill: ${darken_color}
-        }`
-        let style = document.createElement("style")
-        style.innerHTML = this.style_string
-        parent.appendChild(style);
+        }`)
     }
 
     create_svg(parent_div,cfg){
@@ -259,7 +260,7 @@ class Render{
         catch(err){
             console.log(err)
             console.log(`adding style failed, falling back on old style`)
-            this.add_style_element(svg)
+        this.add_se(svg)
         }
     }
     
@@ -270,14 +271,22 @@ class Render{
         let vm = config.render.v_margin * 2
         let hm = config.render.h_margin * 2
         for(let [vid,v] of Object.entries(g.vertices)){
-            let box = ctx.measureText(v.label)
-            let height
-            if(defined(box.fontBoundingBoxAscent) && defined(box.fontBoundingBoxDescent)){
-                height = box.fontBoundingBoxAscent + box.fontBoundingBoxDescent
-            }else{
-                height = config.render.font_height_px
+            if(!(defined(v.viewbox) && defined(v.viewbox.width))){//test for both .width and .height
+                let box = ctx.measureText(v.label)
+                let height
+                if(defined(box.fontBoundingBoxAscent) && defined(box.fontBoundingBoxDescent)){
+                    height = box.fontBoundingBoxAscent + box.fontBoundingBoxDescent
+                }else{
+                    height = config.render.font_height_px
+                }
+                if(defined(v.viewBox) && defined(v.viewBox.x)){//text for both .x and .y
+                    v.viewBox.width = box.width+hm
+                    v.viewBox.height = height+vm
+                    v.viewBox.angle = 0
+                }else{
+                    v.viewBox = {width:box.width+hm,height:height+vm,x:0,y:0,angle:0}
+                }
             }
-            v.viewBox = {width:box.width+hm,height:height+vm,x:0,y:0,angle:0}
         }
         let e_vm = config.render.v_margin
         let e_hm = config.render.h_margin

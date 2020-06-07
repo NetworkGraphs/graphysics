@@ -1,7 +1,10 @@
 import {fetch_json,fetch_xml} from "./utils.js"
 import {defined} from "../libs/web-js-utils.js"
+import {graphviz} from "../libs/graphviz.js"
+
 
 let g = null;
+let config = null;
 
 function element_to_map(element){
     let res = {};
@@ -28,8 +31,7 @@ function replace(obj,bad,good){
 }
 
 function select_label(obj){
-    const prefer_name = true
-    if(prefer_name){
+    if(config.name_over_label){
         if(defined(obj.name)){
             obj.label = obj.name;
         }else if(defined(obj.properties)){
@@ -38,6 +40,8 @@ function select_label(obj){
             }
         }
     }else if(!defined(obj.label) && defined(obj.name)){
+        obj.label = obj.name;
+    }else if(defined(obj.label) && obj.label == "\\N"){//empty string in dot
         obj.label = obj.name;
     }
 }
@@ -153,9 +157,11 @@ function init_forces(graph){
         v.forces = {used:false}
     }
 }
-function init_groups(graph){
+function init_groups_ifndef(graph){
     for(let [vid,v] of Object.entries(graph.vertices)){
-        v.group = {used:false,backup:{}}
+        if(!defined(v.group)){
+            v.group = {used:false}
+        }
     }
 }
 
@@ -217,6 +223,71 @@ function import_xml_graph(xmlDoc){
     return graph
 }
 
+//only properties will be kept selective members vertices and edges only will be passed to the finale graph
+function import_dot_graph(dot){
+    console.log(dot)
+    let graph = {};
+    graph.vertices = {};
+    graph.edges = {};
+    graph.properties = {}
+    graph.properties.name = dot.name
+    graph.properties.directed = dot.directed
+    let add_edge_id = dot.edges.length//global to ensure unique added id beyong existing ones from dot
+    let dot_height = parseFloat(dot.bb.split(',')[3])
+
+    function is_group(obj){return (defined(obj.bb) && defined(obj.nodes))}
+    function is_not_group(obj){return (defined(obj.shape))}
+    function gv_group_to_vertex(obj){
+        let group_v = {id:obj._gvid,name:obj.name,label:obj.label}
+        if(defined(obj.color)){
+            group_v.color = obj.color
+        }
+        let [x,y] = obj.lp.split(',')
+        group_v.viewBox = {x:parseFloat(x),y:dot_height-parseFloat(y)}
+        obj.nodes.forEach((vid)=>{
+            graph.edges[add_edge_id] = {id:add_edge_id, inV:vid,outV:group_v.id,type:"edge",label:"group"}
+            add_edge_id += 1
+        })
+        group_v.group = {used:true}
+        return group_v
+    }
+    function gv_to_vertex(obj){
+        let vertex = {id:obj._gvid,name:obj.name,label:obj.label,color:obj.color}
+        if(defined(obj.color)){
+            vertex.color = obj.color
+        }
+        if(defined(obj.shape)){
+            vertex.shape = obj.shape
+        }
+        let [x,y] = obj.pos.split(',')
+        vertex.viewBox = {x:parseFloat(x),y:dot_height-parseFloat(y)}
+        return vertex
+    }
+    function gv_to_edge(dot_e){
+        let edge = {id:dot_e._gvid,inV:dot_e.head,outV:dot_e.tail}
+        if(defined(dot_e.label)){
+            edge.label = dot_e.label
+        }
+        return edge
+    }
+
+    dot.objects.forEach((obj,vid)=>{
+        if(is_group(obj)){
+            graph.vertices[vid] = gv_group_to_vertex(obj)
+        }else if(is_not_group(obj)){
+            graph.vertices[vid] = gv_to_vertex(obj)
+        }else{
+            console.warn(`${obj.name} could not be identified`)
+        }
+    })
+    dot.edges.forEach((edge,eid)=>{
+        graph.edges[eid] = gv_to_edge(edge)
+    })
+
+    graph.properties.layout_done = true
+    return graph
+}
+
 function readFile(file){
     return new Promise((resolve,reject)=>{
         var reader = new FileReader();
@@ -233,7 +304,8 @@ class GraphIo{
         g = graph_data
     }
 
-    async import_file(file){
+    async import_file(file,cfg){
+        config=cfg
         let res = null
         if(typeof(file) == "string"){
             let extension = file.split('.').pop();
@@ -243,6 +315,12 @@ class GraphIo{
             }else if(extension == "graphml"){
                 let xmlDoc = await fetch_xml(file)
                 res = import_xml_graph(xmlDoc)
+            }else if(extension == "gv"){
+                let response = await fetch(file)
+                let dot_text = await response.text()
+                let dot_json_text = await graphviz.layout(dot_text, "json", "dot")
+                let dot_json = JSON.parse(dot_json_text)
+                res = import_dot_graph(dot_json);
             }
         }else if(typeof(file) == "object"){
 			let extension = file.name.split('.').pop();
@@ -257,6 +335,11 @@ class GraphIo{
                 let parser = new DOMParser();
                 let xmlDoc = parser.parseFromString(text_res,"text/xml");
                 res = import_xml_graph(xmlDoc);
+			}else if(extension == "gv"){
+                let dot_text = await readFile(file)
+                let dot_json_text = await graphviz.layout(dot_text, "json", "dot")
+                let dot_json = JSON.parse(dot_json_text)
+                res = import_dot_graph(dot_json);
 			}
 			else{
 				alert(`unsupported graph format '${extension}'`);
@@ -270,9 +353,11 @@ class GraphIo{
         add_references_from_ids(res);
         add_multi_edges_info(res);
         init_forces(res);
-        init_groups(res);
+        init_groups_ifndef(res);
         g.vertices = res.vertices
         g.edges = res.edges
+        g.layout_done = false//init to false, override by res.properties
+        Object.assign(g,res.properties)
         return
     }
 
