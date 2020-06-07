@@ -88,13 +88,13 @@ function mutate_group_vertices(){
     }
 }
 
-async function common_load(file,reload,config={}){
+async function common_load(file,reload,config=null){
     if(reload){
         console.log(`graph_app> reloading file : ${file.name}`)
         physics.pause()
         render.pause()
     }
-    await gio.import_file(file,config.io)
+    await gio.import_file(file,config)
     console.log(graph)
     if(!reload){
         //required svg before create_graph()
@@ -106,6 +106,7 @@ async function common_load(file,reload,config={}){
         //layout will define vertices boxes positions
         await layout.centrals_first(graph,{width:parent_div.offsetWidth,height:parent_div.offsetHeight})
     }
+    delete graph.layout_done
     //create physical models of vertices boxes with their sizes and positions
     physics.create_bodies(parent_div)
     //creates svg elements of vertices boxes with their sizes and positions

@@ -305,7 +305,9 @@ class GraphIo{
     }
 
     async import_file(file,cfg){
-        config=cfg
+        if(cfg != null){
+            config=cfg
+        }
         let res = null
         if(typeof(file) == "string"){
             let extension = file.split('.').pop();
