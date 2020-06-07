@@ -97,8 +97,21 @@ function show_edges_if(v){
     }
 }
 
+
+function clear_dot(g){
+    for(let [eid,e] of Object.entries(g.edges)){
+        if(defined(e.dot_path)){
+            e.svg.path.classList.add("d_arrow")
+            e.svg.path.classList.remove("dot")
+            delete e.dot_path
+            console.log(e)
+        }
+    }
+}
+
 class Layout{
     async centrals_first(g,params){
+        clear_dot(g)
         let central_order = degree_centrality(g.vertices)
         let already_placed = []
         remove_add_pinned(g,central_order,already_placed)
@@ -129,6 +142,7 @@ class Layout{
     }
 
     async propagate_neighbors(g,params){
+        clear_dot(g)
         let neighbors_order = neighbors_centrality(g.vertices,params.v)
         //neighbors_order.forEach((n)=>{console.log(n.label)})
         let already_placed = []

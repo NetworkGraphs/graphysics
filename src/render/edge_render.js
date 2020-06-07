@@ -64,6 +64,15 @@ function path_circle(center,r){
             a ${r},${r} 0,1,0 ${-2*r},0`
 }
 
+function dot_line(e){
+    let path = `M ${e.outV.viewBox.x},${e.outV.viewBox.y} `
+    e.dot_path.forEach((point)=>{
+        path += `L ${point.x},${point.y} `
+    })
+    path += `L ${e.inV.viewBox.x},${e.inV.viewBox.y}`
+    return path
+}
+
 function line_arrow(e){
     if(e.multi.used){
         let p1 = e.outV.viewBox//temporary fill with default
@@ -118,7 +127,11 @@ class Edge{
         let s_width = (1+e.weight*5)
         let svg = {}
         svg.group       = html(top_svg,/*html*/`<g id="edge_${e.label}"/>`)
-        svg.path        = html(svg.group,/*html*/`<path class="edge path default d_arrow" d="${line_arrow(e)}" stroke-width="2" />`)
+        if(e.dot_path){
+            svg.path        = html(svg.group,/*html*/`<path id="${e.id}" class="edge path default dot" d="${dot_line(e)}"  />`)
+        }else{
+            svg.path        = html(svg.group,/*html*/`<path id="${e.id}" class="edge path default d_arrow" d="${line_arrow(e)}" />`)
+        }
         if(defined(e.label)){
             svg.textpath    = html(svg.group,/*html*/`<path id="e_p_${e.id}" d="${text_path(e)}" visibility="hidden" />`)
             svg.text        = html(svg.group,/*html*/` <text class="e_text" class="edge text" >
@@ -136,7 +149,9 @@ class Edge{
         e.svg.group.setAttribute("visibility","visible")
     }
     update(e){
-        if(e.svg.path.classList.contains("d_arrow")){
+        if(e.dot_path){
+            e.svg.path.setAttribute("d",dot_line(e))
+        }else if(e.svg.path.classList.contains("d_arrow")){
             e.svg.path.setAttribute("d",line_arrow(e))
         }else if(e.svg.path.classList.contains("d_line")){
             e.svg.path.setAttribute("d",line_simple(e))

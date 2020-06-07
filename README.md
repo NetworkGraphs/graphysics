@@ -52,9 +52,16 @@ In this project, the initial layout is performed with a cost based optimisation 
 What is already available
 * Layout
   * stochastic cost driven centrality placement
+  * cost based edge intersection avoidance
   * Nodes physical collisions, no overlap
   * Neighborhood interaction forces
   * step by step demo layout with colred cost samples
+* Grouping
+  * group is a vertex with special edge relation "group"
+  * allows all sorts of grouping, hierarchical and cross groups
+  * Graph mutation to group and ungroup vertices
+* Update Graph
+  * Drag and drop .graphml and .json in Graphson Format
 * SVG
   * shadows and light filters
   * inline html and css with classes
@@ -62,8 +69,6 @@ What is already available
   * Drag Node position with touch
   * Context menu (touch empty area, then second touch on Node)
   * Hover states with touch Node then touch empty area
-* Update Graph
-  * Drag and drop .graphml and .json in Graphson Format
 
 ## Features Details
 * Node
@@ -84,9 +89,6 @@ What is already available
 
 # Plan
 What is planned to be implemented in the Future
-* Grouping
-  * Hierarchical
-  * cross Grouping
 * Swap between :
   * proprties
   * nodes
@@ -96,12 +98,13 @@ What is planned to be implemented in the Future
   * color
   * light
   * filter effect
-* Update Graph
+* Graph Layout
+  * use dot engine as a menu option
+* Graph Explore
   * Query Gremlin server
+  * reference node / edge Gremlin query
 * Global hierarchical context menu
   * text input for queries
-* Update Graph
-  * reference node / edge Gremlin query
 * Mouse and Touch
   * Pan zoom whole graph
   * Zoom vertices labels
@@ -110,6 +113,10 @@ What is planned to be implemented in the Future
   * Acceleration (wasm)
 
 ## Plan Details
+* move the whole group when gragging the group vertex
+* apply dot edge path (as long as no updates performed)
+* highlight all path on edge hover
+* multi points edge routing. In case an edge could shift to a certain extent in order to avoid intersection with vertices
 * configure sampling number (in config file)
 * polyline edges (complex concept, unclear and improvement might not be noticable)
 Style in js :

@@ -35,6 +35,7 @@ function get_pointers_default(e,t_id){
 
 function onMousePan(e){
     const is_vertex = e.target.classList.contains("vertex")
+    const is_edge = e.target.classList.contains("edge")
     let pointe_1 = defined(e.buttons)?(e.buttons == 1):(e.touches.length == 1)
     let pointer_2 = defined(e.buttons)?(e.buttons == 2):(e.touches.length == 2)
     let t_id = pointer_2?1:0
@@ -64,6 +65,26 @@ function onMousePan(e){
                 if(state.over_vertex){
                     event("vertex_hover",{type:"exit",id:state.id})
                     state.over_vertex = false
+                }
+            }
+            if(is_edge){
+                if(!state.over_edge){
+                    state.id = e.target.id
+                    state.over_edge = true
+                    event("edge_hover",{type:"enter",id:state.id,x:pointer_x,y:pointer_y})
+                }else{
+                    if(e.target.id != state.id){
+                        event("edge_hover",{type:"exit",id:state.id})//exit old
+                        state.id = e.target.id
+                        event("edge_hover",{type:"enter",id:state.id,x:pointer_x,y:pointer_y})//enter new
+                    }else{
+                        event("edge_hover",{type:"move",id:state.id,x:pointer_x,y:pointer_y})
+                    }
+                }
+            }else{
+                if(state.over_edge){
+                    event("edge_hover",{type:"exit",id:state.id})
+                    state.over_edge = false
                 }
             }
         }

@@ -268,6 +268,17 @@ function import_dot_graph(dot){
         if(defined(dot_e.label)){
             edge.label = dot_e.label
         }
+        let path = dot_e.pos.split(' ')
+        if(path.length > 5){
+            edge.dot_path = []
+            path[0] = path[0].replace("e,","")
+            path.forEach((point,id)=>{
+                if(id!=0){
+                    let [x,y] = point.split(',')
+                    edge.dot_path.push({x:parseFloat(x),y:dot_height-parseFloat(y)})
+                }
+            })
+        }
         return edge
     }
 

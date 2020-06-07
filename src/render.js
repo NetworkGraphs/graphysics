@@ -17,9 +17,11 @@ let menu_v = null;
 let attraction = false;
 let f_hover = {main:null,pointLight:null,dropShadow:null}
 
-const select_color    = "hsl(140, 80%, 50%)"
-const default_color   = "hsl(140, 80%, 90%)"
-const darken_color    = "hsl(140, 80%, 33%)"
+const select_color      = "hsl(140, 80%, 50%)"
+const default_color     = "hsl(140, 80%, 90%)"
+const edge_color        = "hsl(130, 30%, 60%)"
+const edge_select_color = "hsl(100, 80%, 60%)"
+const darken_color      = "hsl(140, 80%, 33%)"
 
 
 
@@ -33,12 +35,8 @@ function onVertexMenuAction(e){
         e.detail.v.svg.shape.classList.remove("pinned")
         menu.update_action("unpin","pin")
     }else if(e.detail.action == "group"){
-        e.detail.v.grouped = true
-        e.detail.v.svg.shape.classList.add("grouped")
         menu.update_action("group","ungroup")
     }else if(e.detail.action == "ungroup"){
-        e.detail.v.grouped = false
-        e.detail.v.svg.shape.classList.remove("grouped")
         menu.update_action("ungroup","group")
     }
 }
@@ -56,7 +54,7 @@ function onVertexContextMenu(e){
         menu_v = g.vertices[e.detail.id]
         let vb = menu_v.viewBox
         let pin_name = menu_v.pinned?"unpin":"pin"
-        let group_name = menu_v.grouped?"ungroup":"group"
+        let group_name = menu_v.group.used?"ungroup":"group"
         let buttons = menu.call({svg:svg,menu:"Vertex",x:vb.x,y:vb.y,actions:["attract","layout",pin_name,group_name]})
         let buttonMenuclick = (e)=>{send("menu_action",{menu:"Vertex",type:"click",action:e.target.getAttribute("data-name"),v:menu_v} )}
         buttons[pin_name].addEventListener( 'click', buttonMenuclick, false );
@@ -129,6 +127,12 @@ function onVertexHover(e){
         f_hover.dropShadow.setAttribute("dy",ly/5)
     }
 }
+function onEdgeHover(e){
+    const edge = g.edges[e.detail.id]
+    if(e.detail.type != "move"){
+        console.log(`hover over edge (${edge.outV.label},${edge.inV.label}) => ${e.detail.type}`)
+    }
+}
 
 function onVertexDrag(e){
     if(e.detail.type == "start"){
@@ -144,6 +148,7 @@ class Render{
     init(graph_data){
         g = graph_data
         window.addEventListener( 'vertex_hover', onVertexHover, false );
+        window.addEventListener( 'edge_hover', onEdgeHover, false );
         window.addEventListener( 'vertex_drag', onVertexDrag, false );
         window.addEventListener( 'context_menu', onContextMenu, false );
         window.addEventListener( 'menu_action', onMenuAction, false );
@@ -195,12 +200,25 @@ class Render{
         }`);
         this.sheet.insertRule(/*css*/`
         .edge.hover {
-            stroke: ${select_color}
+            stroke: ${edge_select_color};
+            fill: ${edge_select_color};
+        }`);
+        this.sheet.insertRule(/*css*/`
+        .edge.dot {
+            stroke-width:2;
+            stroke: ${edge_color};
+            fill:rgba(0,0,0,0)
+        }`);
+        this.sheet.insertRule(/*css*/`
+        .edge.dot.hover {
+            stroke: ${edge_select_color};
+            fill:rgba(0,0,0,0)
         }`);
         this.sheet.insertRule(/*css*/`
         .edge.default {
-            stroke: ${default_color};
-            fill: ${darken_color}
+            stroke-width:2;
+            stroke: ${edge_color};
+            fill: ${edge_color}
         }`);
         document.adoptedStyleSheets = [...document.adoptedStyleSheets, this.sheet];
     }
