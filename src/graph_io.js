@@ -22,7 +22,7 @@ return res;
 }
 
 function select_label(obj){
-    if(config.name_over_label){
+    if(config.io.name_over_label){
         if(defined(obj.name)){
             obj.label = obj.name;
         }else if(defined(obj.properties)){

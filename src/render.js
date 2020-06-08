@@ -4,10 +4,15 @@ import {Menu} from "./menu.js"
 import {Edge} from "./render/edge_render.js"
 import {Group} from "./render/group_render.js"
 
+import { Layout } from "./layout.js";
+
+
 let utl = new Svg()
 let menu = new Menu()
 let edge = new Edge()
 let group = new Group()
+let layout = new Layout()
+
 
 let g = null;
 let svg = null;
@@ -129,8 +134,20 @@ function onVertexHover(e){
 }
 function onEdgeHover(e){
     const edge = g.edges[e.detail.id]
-    if(e.detail.type != "move"){
-        console.log(`hover over edge (${edge.outV.label},${edge.inV.label}) => ${e.detail.type}`)
+    if(e.detail.type == "enter"){
+        let path_edges_set = layout.traverse_edge_path(g,edge)
+        edge.svg.path.classList.add("hover")
+        for(let p_edge of path_edges_set){
+            p_edge.svg.path.classList.add("hover")
+        }
+        console.log(`hover enter edge (${edge.outV.label} -> ${edge.inV.label})`)
+    }else if(e.detail.type == "exit"){
+        let path_edges_set = layout.traverse_edge_path(g,edge)
+        edge.svg.path.classList.remove("hover")
+        for(let p_edge of path_edges_set){
+            p_edge.svg.path.classList.remove("hover")
+        }
+        console.log(`hover exit edge (${edge.outV.label} -> ${edge.inV.label})`)
     }
 }
 

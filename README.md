@@ -66,6 +66,8 @@ What is already available
   * shadows and light filters
   * inline html and css with classes
 * Mouse and Touch
+  * Highlight neighbors on vertex hover
+  * Highlight path on edge hover
   * Drag Node position with touch
   * Context menu (touch empty area, then second touch on Node)
   * Hover states with touch Node then touch empty area
@@ -123,6 +125,8 @@ Style in js :
 * collect muliple css rules in one litteral string
 * optionally add support for .dot import with [graphlib-dot](https://github.com/dagrejs/graphlib-dot)
 
+# Ideas
+* consider 3d interface such as [this button shadows example](https://lume.io/docs/#/examples/buttons-with-shadow)
 
 # Development
 * Physics engine : Matter.js (looking for wasm accelerated replacement)

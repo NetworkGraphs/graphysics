@@ -47,6 +47,12 @@ function onMousePan(e){
     if(["mousemove","touchmove"].includes(e.type)){
         //console.log(`dragging:${state.dragging} , over_vertex:${state.over_vertex}`)
         if(!state.dragging && !state.menu){//then no update for the hover state machine
+            if(!is_edge){
+                if(state.over_edge){
+                    event("edge_hover",{type:"exit",id:state.id})
+                    state.over_edge = false
+                }
+            }
             if(is_vertex){
                 if(!state.over_vertex){
                     state.id = e.target.id
@@ -80,11 +86,6 @@ function onMousePan(e){
                     }else{
                         event("edge_hover",{type:"move",id:state.id,x:pointer_x,y:pointer_y})
                     }
-                }
-            }else{
-                if(state.over_edge){
-                    event("edge_hover",{type:"exit",id:state.id})
-                    state.over_edge = false
                 }
             }
         }

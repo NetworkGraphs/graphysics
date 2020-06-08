@@ -50,6 +50,51 @@ function neighbors_centrality(vertices,center){
     return neighbors
 }
 
+function get_out_edges(edge){
+    let res = []
+    const outV_id = edge.outV.id
+    for(let [eid,e] of Object.entries(edge.outV.edges)){
+        if(e.inV.id == outV_id){
+            res.push(e)
+        }
+    }
+    return res
+}
+
+function get_in_edges(edge){
+    let res = []
+    const inV_id = edge.inV.id
+    for(let [eid,e] of Object.entries(edge.inV.edges)){
+        if(e.outV.id == inV_id){
+            res.push(e)
+        }
+    }
+    return res
+}
+
+function traverse_edges(g,edge,out_stream){
+    for(let [eid,e] of Object.entries(g.edges)){
+        e.seen = false
+    }
+
+    let path_e = new Set()
+    let todo_e = out_stream?get_out_edges(edge):get_in_edges(edge)
+    while(todo_e.length > 0){
+        let current_e = todo_e.shift()
+        if(!current_e.seen){
+            current_e.seen = true
+            path_e.add(current_e)
+            let add_e = out_stream?get_out_edges(current_e):get_in_edges(current_e)
+            todo_e.push(...add_e)
+        }
+    }
+
+    for(let [eid,e] of Object.entries(g.edges)){
+        delete e.seen
+    }
+    return path_e
+}
+
 function remove_add_pinned(g,vertices,already_placed){
     for(let [vid,v] of Object.entries(g.vertices)){
         if(defined(v.pinned) && v.pinned){
@@ -178,6 +223,11 @@ class Layout{
         }
         edges_visibility(g,true)
 
+    }
+    traverse_edge_path(graph,edge){
+        const set_up = traverse_edges(graph,edge,true)
+        const set_down = traverse_edges(graph,edge,false)
+        return new Set([...set_up, ...set_down])
     }
 }
 
