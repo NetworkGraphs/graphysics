@@ -132,6 +132,10 @@ Style in js :
 * Physics engine : Matter.js (looking for wasm accelerated replacement)
 * SVG : usage of parametric string template is enough to leverage the full power and professional documentation of the SVG standard, no bottleneck wrapper library and no alien syntax such as d3. Critical sections have direct update with setAttribute().
 
+# Issues and limitations
+* grouped node do not get a collision body
+* some nodes collision fail with high node number (bug not related to performance)
+
 # Existing Graph drawing tools
 ## Frameworks
 * [Graphviz](http://www.graphviz.org/) : C++, SVG, dot language, Layout, Static, Community
