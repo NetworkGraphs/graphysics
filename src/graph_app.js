@@ -80,14 +80,6 @@ function onDragEvents(event){
     };
 }
 
-function mutate_group_vertices(){
-    for(let [vid,v] of Object.entries(graph.vertices)){
-        if(v.group.used){
-            mutate.group(graph,v)
-        }
-    }
-}
-
 async function common_load(file,reload,config=null){
     if(reload){
         console.log(`graph_app> reloading file : ${file.name}`)
@@ -111,7 +103,7 @@ async function common_load(file,reload,config=null){
     physics.create_bodies(parent_div)
     //creates svg elements of vertices boxes with their sizes and positions
     render.create_graph()
-    mutate_group_vertices()
+    mutate.all_groups(graph)
 
     if(reload){
         physics.resume()

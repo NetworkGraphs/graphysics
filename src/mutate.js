@@ -95,6 +95,22 @@ class Mutate{
         render.remove_group(vertex)
         vertex.svg.shape.classList.remove("group")
     }
+
+    all_groups(graph){
+        for(let [vid,v] of Object.entries(graph.vertices)){
+            if(v.group.used){
+                mutate.group(graph,v)
+            }else{
+                for(let [eid,e] of Object.entries(v.edges)){
+                    if((e.label == "group") && (e.outV.id == vid)){
+                        console.log(`grouping ${v.name}`)
+                        this.group(graph,v)
+                        break
+                    }
+                }
+            }
+        }
+    }
 }
 
 export{Mutate};

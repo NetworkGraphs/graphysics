@@ -1,0 +1,598 @@
+{
+  "vertices": [
+    {
+      "name": "mano power",
+      "mac": "0x00124b001d4a012d",
+      "zigbee_coordinator": "mzig",
+      "id": 0
+    },
+    {
+      "name": "floody",
+      "mac": "0x00158d000255fb8b",
+      "zigbee_coordinator": "mzig",
+      "id": 1
+    },
+    {
+      "name": "desk motion",
+      "mac": "0x00158d0002a4f61e",
+      "zigbee_coordinator": "mzig",
+      "id": 2
+    },
+    {
+      "name": "cube",
+      "mac": "0x00158d00028f8531",
+      "zigbee_coordinator": "mzig",
+      "id": 3
+    },
+    {
+      "name": "bed light button",
+      "mac": "0x00158d0001ef6374",
+      "zigbee_coordinator": "mzig",
+      "room": "bedroom",
+      "id": 4
+    },
+    {
+      "name": "bed weather",
+      "mac": "0x00158d00026ecd6a",
+      "zigbee_coordinator": "mzig",
+      "room": "bedroom",
+      "id": 5
+    },
+    {
+      "name": "balcony weather",
+      "mac": "0x00158d000237df83",
+      "zigbee_coordinator": "mzig",
+      "room": "balcony",
+      "id": 6
+    },
+    {
+      "name": "balcony window left",
+      "mac": "0x00158d000272623b",
+      "zigbee_coordinator": "mzig",
+      "room": "livingroom",
+      "id": 7
+    },
+    {
+      "name": "balcony window right",
+      "mac": "0x00158d0002760208",
+      "zigbee_coordinator": "mzig",
+      "room": "livingroom",
+      "id": 8
+    },
+    {
+      "name": "balcony door",
+      "mac": "0x00158d0002518c83",
+      "zigbee_coordinator": "mzig",
+      "room": "livingroom",
+      "id": 9
+    },
+    {
+      "name": "tree button",
+      "mac": "0x00158d0001eb81c7",
+      "zigbee_coordinator": "mzig",
+      "id": 10
+    },
+    {
+      "name": "bed nic button",
+      "mac": "0x00158d00029078a2",
+      "zigbee_coordinator": "mzig",
+      "room": "bedroom",
+      "id": 11
+    },
+    {
+      "name": "bathroom fan button",
+      "mac": "0x00158d0002a2c21c",
+      "zigbee_coordinator": "mzig",
+      "room": "bathroom",
+      "id": 12
+    },
+    {
+      "name": "pc button",
+      "mac": "0x00158d0001eb8fc9",
+      "zigbee_coordinator": "mzig",
+      "room": "office",
+      "id": 13
+    },
+    {
+      "name": "bed heat button",
+      "mac": "0x00158d0001e7a12b",
+      "zigbee_coordinator": "mzig",
+      "room": "bedroom",
+      "id": 14
+    },
+    {
+      "name": "office heat",
+      "mac": "0x00158d0001922d22",
+      "zigbee_coordinator": "mzig",
+      "room": "office",
+      "id": 15
+    },
+    {
+      "name": "office chair vibration",
+      "mac": "0x00158d0002a4f51d",
+      "zigbee_coordinator": "mzig",
+      "room": "office",
+      "id": 16
+    },
+    {
+      "name": "cupboard light",
+      "mac": "0x000d6ffffe9ccd6a",
+      "zigbee_coordinator": "mzig",
+      "room": "hallway",
+      "id": 17
+    },
+    {
+      "name": "mzig",
+      "hostname": "mano",
+      "zigbee_channel": 26,
+      "id": 18
+    },
+    {
+      "name": "power lifo",
+      "mac": "0x00124b001d4a014b",
+      "zigbee_coordinator": "lzig",
+      "id": 19
+    },
+    {
+      "name": "coord lifo",
+      "mac": "0x00124b0018ed23a5",
+      "zigbee_coordinator": "lzig",
+      "id": 20
+    },
+    {
+      "name": "living heat",
+      "mac": "0x00158d000192dd3e",
+      "zigbee_coordinator": "lzig",
+      "room": "livingroom",
+      "id": 21
+    },
+    {
+      "name": "office window right",
+      "mac": "0x00158d0004240973",
+      "zigbee_coordinator": "lzig",
+      "room": "office",
+      "id": 22
+    },
+    {
+      "name": "office window left",
+      "mac": "0x00158d0004237aad",
+      "zigbee_coordinator": "lzig",
+      "room": "office",
+      "id": 23
+    },
+    {
+      "name": "office weather",
+      "mac": "0x00158d0002476b04",
+      "zigbee_coordinator": "lzig",
+      "room": "office",
+      "id": 24
+    },
+    {
+      "name": "office switch",
+      "mac": "0x00158d00028f7fb5",
+      "zigbee_coordinator": "lzig",
+      "room": "office",
+      "id": 25
+    },
+    {
+      "name": "bedroom window",
+      "mac": "0x00158d00041a3bfe",
+      "zigbee_coordinator": "lzig",
+      "room": "bedroom",
+      "id": 26
+    },
+    {
+      "name": "kitchen window",
+      "mac": "0x00158d00041a3b31",
+      "zigbee_coordinator": "lzig",
+      "room": "kitchen",
+      "id": 27
+    },
+    {
+      "name": "power router",
+      "mac": "0x00124b001c2f1279",
+      "zigbee_coordinator": "lzig",
+      "id": 28
+    },
+    {
+      "name": "bathroom heat",
+      "mac": "0x00158d0001922d10",
+      "zigbee_coordinator": "lzig",
+      "room": "bathroom",
+      "id": 29
+    },
+    {
+      "name": "kitchen heat",
+      "mac": "0x00158d0001922ce9",
+      "zigbee_coordinator": "lzig",
+      "room": "kitchen",
+      "id": 30
+    },
+    {
+      "name": "tv button",
+      "mac": "0xccccccfffee20ebd",
+      "zigbee_coordinator": "lzig",
+      "room": "livingroom",
+      "id": 31
+    },
+    {
+      "name": "bedroom heat",
+      "mac": "0x00158d0001922d4f",
+      "zigbee_coordinator": "lzig",
+      "room": "bedroom",
+      "id": 32
+    },
+    {
+      "name": "lzig",
+      "hostname": "lifo",
+      "zigbee_channel": 13,
+      "id": 33
+    },
+    {
+      "name": "bedroom",
+      "id": 34
+    },
+    {
+      "name": "balcony",
+      "id": 35
+    },
+    {
+      "name": "livingroom",
+      "id": 36
+    },
+    {
+      "name": "bathroom",
+      "id": 37
+    },
+    {
+      "name": "office",
+      "id": 38
+    },
+    {
+      "name": "hallway",
+      "id": 39
+    },
+    {
+      "name": "kitchen",
+      "id": 40
+    }
+  ],
+  "edges": [
+    {
+      "id": 0,
+      "outV": 34,
+      "inV": 4,
+      "label": "group"
+    },
+    {
+      "id": 1,
+      "outV": 34,
+      "inV": 5,
+      "label": "group"
+    },
+    {
+      "id": 2,
+      "outV": 35,
+      "inV": 6,
+      "label": "group"
+    },
+    {
+      "id": 3,
+      "outV": 36,
+      "inV": 7,
+      "label": "group"
+    },
+    {
+      "id": 4,
+      "outV": 36,
+      "inV": 8,
+      "label": "group"
+    },
+    {
+      "id": 5,
+      "outV": 36,
+      "inV": 9,
+      "label": "group"
+    },
+    {
+      "id": 6,
+      "outV": 34,
+      "inV": 11,
+      "label": "group"
+    },
+    {
+      "id": 7,
+      "outV": 37,
+      "inV": 12,
+      "label": "group"
+    },
+    {
+      "id": 8,
+      "outV": 38,
+      "inV": 13,
+      "label": "group"
+    },
+    {
+      "id": 9,
+      "outV": 34,
+      "inV": 14,
+      "label": "group"
+    },
+    {
+      "id": 10,
+      "outV": 38,
+      "inV": 15,
+      "label": "group"
+    },
+    {
+      "id": 11,
+      "outV": 38,
+      "inV": 16,
+      "label": "group"
+    },
+    {
+      "id": 12,
+      "outV": 39,
+      "inV": 17,
+      "label": "group"
+    },
+    {
+      "id": 13,
+      "outV": 36,
+      "inV": 21,
+      "label": "group"
+    },
+    {
+      "id": 14,
+      "outV": 38,
+      "inV": 22,
+      "label": "group"
+    },
+    {
+      "id": 15,
+      "outV": 38,
+      "inV": 23,
+      "label": "group"
+    },
+    {
+      "id": 16,
+      "outV": 38,
+      "inV": 24,
+      "label": "group"
+    },
+    {
+      "id": 17,
+      "outV": 38,
+      "inV": 25,
+      "label": "group"
+    },
+    {
+      "id": 18,
+      "outV": 34,
+      "inV": 26,
+      "label": "group"
+    },
+    {
+      "id": 19,
+      "outV": 40,
+      "inV": 27,
+      "label": "group"
+    },
+    {
+      "id": 20,
+      "outV": 37,
+      "inV": 29,
+      "label": "group"
+    },
+    {
+      "id": 21,
+      "outV": 40,
+      "inV": 30,
+      "label": "group"
+    },
+    {
+      "id": 22,
+      "outV": 36,
+      "inV": 31,
+      "label": "group"
+    },
+    {
+      "id": 23,
+      "outV": 34,
+      "inV": 32,
+      "label": "group"
+    },
+    {
+      "id": 24,
+      "outV": 18,
+      "inV": 0,
+      "label": "group"
+    },
+    {
+      "id": 25,
+      "outV": 18,
+      "inV": 1,
+      "label": "group"
+    },
+    {
+      "id": 26,
+      "outV": 18,
+      "inV": 2,
+      "label": "group"
+    },
+    {
+      "id": 27,
+      "outV": 18,
+      "inV": 3,
+      "label": "group"
+    },
+    {
+      "id": 28,
+      "outV": 18,
+      "inV": 4,
+      "label": "group"
+    },
+    {
+      "id": 29,
+      "outV": 18,
+      "inV": 5,
+      "label": "group"
+    },
+    {
+      "id": 30,
+      "outV": 18,
+      "inV": 6,
+      "label": "group"
+    },
+    {
+      "id": 31,
+      "outV": 18,
+      "inV": 7,
+      "label": "group"
+    },
+    {
+      "id": 32,
+      "outV": 18,
+      "inV": 8,
+      "label": "group"
+    },
+    {
+      "id": 33,
+      "outV": 18,
+      "inV": 9,
+      "label": "group"
+    },
+    {
+      "id": 34,
+      "outV": 18,
+      "inV": 10,
+      "label": "group"
+    },
+    {
+      "id": 35,
+      "outV": 18,
+      "inV": 11,
+      "label": "group"
+    },
+    {
+      "id": 36,
+      "outV": 18,
+      "inV": 12,
+      "label": "group"
+    },
+    {
+      "id": 37,
+      "outV": 18,
+      "inV": 13,
+      "label": "group"
+    },
+    {
+      "id": 38,
+      "outV": 18,
+      "inV": 14,
+      "label": "group"
+    },
+    {
+      "id": 39,
+      "outV": 18,
+      "inV": 15,
+      "label": "group"
+    },
+    {
+      "id": 40,
+      "outV": 18,
+      "inV": 16,
+      "label": "group"
+    },
+    {
+      "id": 41,
+      "outV": 18,
+      "inV": 17,
+      "label": "group"
+    },
+    {
+      "id": 42,
+      "outV": 33,
+      "inV": 19,
+      "label": "group"
+    },
+    {
+      "id": 43,
+      "outV": 33,
+      "inV": 20,
+      "label": "group"
+    },
+    {
+      "id": 44,
+      "outV": 33,
+      "inV": 21,
+      "label": "group"
+    },
+    {
+      "id": 45,
+      "outV": 33,
+      "inV": 22,
+      "label": "group"
+    },
+    {
+      "id": 46,
+      "outV": 33,
+      "inV": 23,
+      "label": "group"
+    },
+    {
+      "id": 47,
+      "outV": 33,
+      "inV": 24,
+      "label": "group"
+    },
+    {
+      "id": 48,
+      "outV": 33,
+      "inV": 25,
+      "label": "group"
+    },
+    {
+      "id": 49,
+      "outV": 33,
+      "inV": 26,
+      "label": "group"
+    },
+    {
+      "id": 50,
+      "outV": 33,
+      "inV": 27,
+      "label": "group"
+    },
+    {
+      "id": 51,
+      "outV": 33,
+      "inV": 28,
+      "label": "group"
+    },
+    {
+      "id": 52,
+      "outV": 33,
+      "inV": 29,
+      "label": "group"
+    },
+    {
+      "id": 53,
+      "outV": 33,
+      "inV": 30,
+      "label": "group"
+    },
+    {
+      "id": 54,
+      "outV": 33,
+      "inV": 31,
+      "label": "group"
+    },
+    {
+      "id": 55,
+      "outV": 33,
+      "inV": 32,
+      "label": "group"
+    }
+  ]
+}

@@ -1,8 +1,9 @@
 {
-    "default_graph_file3":"./data/hello_world.gv",
     "default_graph_file0":"./data/GraphSON_blueprints.json",
     "default_graph_file":"./data/GraphSON_Tinker.json",
     "default_graph_file2":"./data/LesMiserables.graphml",
+    "default_graph_file3":"./data/hello_world.gv",
+    "default_graph_file4":"./data/smart_home.json",
     "render":{
         "font":"Verdana",
         "font_height_px":16,
