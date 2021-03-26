@@ -5,7 +5,7 @@ Graph with collision Physics, using SVG with style, Interactive Nodes mutations 
 https://networkgraphs.github.io/graphysics/
 
 # community discussion
-<img src ="./media/discord.png" href="https://discord.gg/wCxpAX8TQk" width="100">
+[<img src ="./media/discord.png" width="100">](https://discord.gg/wCxpAX8TQk)
 
 Do you have a question or an idea related to this project ? Feel free to join the [discord](https://discord.gg/wCxpAX8TQk) to chat live, make suggestions and give feedback
 
