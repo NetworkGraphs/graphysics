@@ -185,6 +185,9 @@ function import_json_graph(input){
     }
     rename_list_ids(graph)//must be applied before the graph can be turned into a map (object)
     let res = import_to_obj_graph(graph);
+    if(input.hasOwnProperty("properties")){
+        res.properties = input.properties
+    }
     return res
 }
 
@@ -364,7 +367,7 @@ class GraphIo{
         if(res == null){
             return
         }
-        console.log(res)
+        console.log(JSON.stringify(res))
         rename_properties(res);
         add_references_from_ids(res);
         add_multi_edges_info(res);
