@@ -84,18 +84,9 @@ function onMqttMessage(e){
     const topic = e.detail.topic
     const data = e.detail.payload
     //console.log(`graph_app> ${topic}	=> ${JSON.stringify(data)}`);
-    //TODO select sub topic of new graph vs update
     const action = topic.split('/')[1]
     if(action == "reload"){
-        physics.pause()
-        render.pause()
-        gio.import_json(data)
-        render.fitLabels()
-        physics.create_bodies(parent_div)
-        render.create_graph()
-        mutate.all_groups(graph)
-        physics.resume()
-        render.resume()
+        common_load(null, true, null, data)
     }else if(action == "update"){
         for(const vertex of data.vertices){
             let v = graph.vertices[vertex.id]
@@ -107,13 +98,19 @@ function onMqttMessage(e){
 }
 
 
-async function common_load(file,reload,config=null){
+async function common_load(file,reload,config=null,graph_input=null){
     if(reload){
-        console.log(`graph_app> reloading file : ${file.name}`)
+        console.log(`graph_app> reloading`)
         physics.pause()
         render.pause()
     }
-    await gio.import_file(file,config)
+    if(graph_input){
+        console.log("graph_app> mqtt : graph_input")
+        gio.import_json(graph_input)
+    }else{
+        console.log(`graph_app> file : ${file.name}`)
+        await gio.import_file(file,config)
+    }
     console.log(graph)
     if(!reload){
         //required svg before create_graph()
