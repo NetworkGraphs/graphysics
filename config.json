@@ -16,5 +16,12 @@
     "github":{
         "image":"./media/github.png",
         "link":"https://github.com/NetworkGraphs/graphysics"
+    },
+    "mqtt":{
+        "host":"10.0.0.42",
+        "port":1884,
+        "client":"graphysics",
+        "subscribe":"graph/#",
+        "enabled":true
     }
 }

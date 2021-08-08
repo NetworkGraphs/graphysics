@@ -320,6 +320,19 @@ class GraphIo{
         g = graph_data
     }
 
+    async common_import(res){
+        rename_properties(res);
+        add_references_from_ids(res);
+        add_multi_edges_info(res);
+        init_forces(res);
+        init_groups_ifndef(res);
+        g.vertices = res.vertices
+        g.edges = res.edges
+        g.layout_done = false//init to false, override by res.properties
+        Object.assign(g,res.properties)
+        return
+    }
+
     async import_file(file,cfg){
         if(cfg != null){
             config=cfg
@@ -367,7 +380,7 @@ class GraphIo{
         if(res == null){
             return
         }
-        console.log(JSON.stringify(res))
+        //console.log(JSON.stringify(res))
         rename_properties(res);
         add_references_from_ids(res);
         add_multi_edges_info(res);
@@ -380,6 +393,12 @@ class GraphIo{
         return
     }
 
+    import_json(data){
+        let res = import_json_graph(data);
+        //console.log(JSON.stringify(res))
+        this.common_import(res)
+        return
+    }
 }
 
 export {GraphIo};

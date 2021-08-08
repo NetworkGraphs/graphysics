@@ -80,6 +80,33 @@ function onDragEvents(event){
     };
 }
 
+function onMqttMessage(e){
+    const topic = e.detail.topic
+    const data = e.detail.payload
+    //console.log(`graph_app> ${topic}	=> ${JSON.stringify(data)}`);
+    //TODO select sub topic of new graph vs update
+    const action = topic.split('/')[1]
+    if(action == "reload"){
+        physics.pause()
+        render.pause()
+        gio.import_json(data)
+        render.fitLabels()
+        physics.create_bodies(parent_div)
+        render.create_graph()
+        mutate.all_groups(graph)
+        physics.resume()
+        render.resume()
+    }else if(action == "update"){
+        for(const vertex of data.vertices){
+            let v = graph.vertices[vertex.id]
+            v.viewBox.x = vertex.viewBox.x
+            v.viewBox.y = vertex.viewBox.y
+            v.viewBox.placed = true
+        }
+    }
+}
+
+
 async function common_load(file,reload,config=null){
     if(reload){
         console.log(`graph_app> reloading file : ${file.name}`)
@@ -134,6 +161,8 @@ class GraphApp{
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             document.addEventListener(eventName, onDragEvents, false)
         });
+        window.addEventListener( 'mqtt_message', onMqttMessage, false);
+
     }
 
     async load(config,p_div){
