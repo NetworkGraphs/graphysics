@@ -4,10 +4,10 @@ Graph with collision Physics, using SVG with style, Interactive Nodes mutations 
 # Live demo
 https://networkgraphs.github.io/graphysics/
 
-# Discussions Forum
-get support, give feedback or simply chat to brainstorm about ideas right here on github with a special forum for this project
-
-https://github.com/NetworkGraphs/graphysics/discussions
+# Wiki Forum Tickets
+* Wiki : https://github.com/NetworkGraphs/NetworkGraphs/wiki
+* Forum support, feedback and ideas: https://github.com/NetworkGraphs/graphysics/discussions
+* Tickets for Issues related to the source code in this repo : https://github.com/NetworkGraphs/graphysics/issues
 
 # Gif demo
 ## interactive light and shadow svg filters
