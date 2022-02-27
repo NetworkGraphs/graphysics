@@ -4,13 +4,10 @@ Graph with collision Physics, using SVG with style, Interactive Nodes mutations 
 # Live demo
 https://networkgraphs.github.io/graphysics/
 
-# Discourse forum
-get support, give feedback or simply chat about ideas on the forum
+# Discussions Forum
+get support, give feedback or simply chat to brainstorm about ideas right here on github with a special forum for this project
 
-[![discourse](./media/forum.png)](https://homesmartmesh.discourse.group/c/webapps/14)
-
-[Home Smart Mesh Forum - Webapps Category](https://homesmartmesh.discourse.group/c/webapps/14)
-
+https://github.com/NetworkGraphs/graphysics/discussions
 
 # Gif demo
 ## interactive light and shadow svg filters
