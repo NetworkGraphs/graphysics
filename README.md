@@ -160,7 +160,7 @@ Network module, canvas rendering, physics included, modular. limited interactivi
 
 [interactive demo](https://dagrejs.github.io/project/dagre-d3/latest/demo/interactive-demo.html) zoom pan, style in dot, [exploration demo](http://cs.brown.edu/people/jcmace/d3/graph.html?id=small.json) with interactive context menu, multiple selections (neighbors, paths,...), partial layouting. Dagre is used by Cytoscape, TensorFlow,... CSS styling through d3.
 
-* [Cytoscape](https://js.cytoscape.org/) : Canvas, interactive
+* [Cytoscape](https://js.cytoscape.org/) : Canvas, interactive (does not layout labels)
 
 Graph theory (network) library for visualisation and analysis. Canvas based. Cytoscape is a java based framework and the js front end has limited functionnalities, it is nevertheless a framework that allows all sorts of plugis ([Dagre](https://github.com/cytoscape/cytoscape.js-dagre), [Cola](https://github.com/cytoscape/cytoscape.js-cola),...) for layouting and other interactivity features.
 * [Sigma.js](http://sigmajs.org/) : WebGL or Canvas, json gexf import, pan zoom highlight, 9k Stars
